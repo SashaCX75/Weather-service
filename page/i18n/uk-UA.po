@@ -1,0 +1,225 @@
+msgid "lang"
+msgstr "uk"
+
+msgid "get_geo"
+msgstr "Визначити координати"
+
+msgid "update_geo"
+msgstr "Оновити координати"
+
+msgid "start_service"
+msgstr "Працювати у фоні"
+
+msgid "stop_service"
+msgstr "Зупинити роботу у фоні"
+
+msgid "start_alarm_service"
+msgstr "Запускати для оновлення"
+
+msgid "stop_alarm_service"
+msgstr "Не запускати для оновлення"
+
+msgid "bg_servise_hint"
+msgstr "Постійна робота додатка у фоні більш стабільна.\nПеріодичний запуск додатка для оновлення даних не заважає іншим додаткам працювати у фоні."
+
+msgid "latitude"
+msgstr "Широта"
+
+msgid "longitude"
+msgstr "Довгота"
+
+msgid "city"
+msgstr "Місто"
+
+msgid "rain"
+msgstr "Опади"
+
+msgid "chanceOfRain"
+msgstr "Імовірність опадів"
+
+msgid "visibility"
+msgstr "Видимість"
+
+msgid "timezone"
+msgstr "Часовий пояс"
+
+msgid "rise"
+msgstr "Схід"
+
+msgid "set"
+msgstr "Захід"
+
+msgid "coord_not_update"
+msgstr "Необхідно визначити координати"
+
+msgid "weather_update"
+msgstr "Погоду оновлено"
+
+msgid "forecast_update"
+msgstr "Прогноз оновлено"
+
+msgid "weather_title"
+msgstr "Погода"
+
+msgid "forecast_title"
+msgstr "Прогноз погоди"
+
+msgid "m_s"
+msgstr " м/с"
+
+msgid "kph"
+msgstr " км/год"
+
+msgid "mph"
+msgstr " mph"
+
+msgid "meter"
+msgstr " м"
+
+msgid "mm"
+msgstr " мм"
+
+msgid "km"
+msgstr " км"
+
+msgid "mile"
+msgstr " miles"
+
+msgid "mmHg"
+msgstr " мм.рт.ст"
+
+msgid "temperature"
+msgstr "Температура"
+
+msgid "feels"
+msgstr "Відчувається"
+
+msgid "humidity"
+msgstr "Вологість"
+
+msgid "wind"
+msgstr "Вітер"
+
+msgid "pressure"
+msgstr "Тиск"
+
+msgid "UVI"
+msgstr "УФ-індекс"
+
+msgid "cloudiness"
+msgstr "Хмарність"
+
+msgid "tame_update"
+msgstr "Час оновлення"
+
+msgid "site_OpenWeather_API"
+msgstr "OpenWeather (API)"
+
+msgid "site_AccuWeather"
+msgstr "AccuWeather"
+
+msgid "site_AccuWeather_API"
+msgstr "AccuWeather (API)"
+
+msgid "APIkey_invalide"
+msgstr "Введіть правильний API key у налаштуваннях (у додатку Zepp)"
+
+msgid "zepp_disconnected"
+msgstr "Немає зв'язку з Zepp"
+
+msgid "month_0"
+msgstr "січня"
+
+msgid "month_1"
+msgstr "лютого"
+
+msgid "month_2"
+msgstr "березня"
+
+msgid "month_3"
+msgstr "квітня"
+
+msgid "month_4"
+msgstr "травня"
+
+msgid "month_5"
+msgstr "червня"
+
+msgid "month_6"
+msgstr "липня"
+
+msgid "month_7"
+msgstr "серпня"
+
+msgid "month_8"
+msgstr "вересня"
+
+msgid "month_9"
+msgstr "жовтня"
+
+msgid "month_10"
+msgstr "листопада"
+
+msgid "month_11"
+msgstr "грудня"
+
+msgid "day_of_week_0"
+msgstr "Нд"
+
+msgid "day_of_week_1"
+msgstr "Пн"
+
+msgid "day_of_week_2"
+msgstr "Вт"
+
+msgid "day_of_week_3"
+msgstr "Ср"
+
+msgid "day_of_week_4"
+msgstr "Чт"
+
+msgid "day_of_week_5"
+msgstr "Пт"
+
+msgid "day_of_week_6"
+msgstr "Сб"
+
+msgid "settings_update"
+msgstr "Налаштування синхронізовані"
+
+msgid "graf_hint"
+msgstr "Прогноз погоди на 5 днів"
+
+msgid "number_of_requests"
+msgstr "Перевищено ліміт запитів"
+
+
+
+
+// не переводить
+msgid "element_text_id_UVI"
+msgstr "індекс УФ"
+
+msgid "element_text_id_windSpeed"
+msgstr "Вітер"
+
+msgid "element_text_id_windGusts"
+msgstr "Пориви вітру"
+
+msgid "element_text_id_humidity"
+msgstr "Вологість"
+
+msgid "element_text_id_pressure"
+msgstr "Тиск"
+
+msgid "element_text_id_cloudiness"
+msgstr "Хмарний покрив"
+
+msgid "element_text_id_visibility"
+msgstr "Видимість"
+
+msgid "element_text_id_chanceOfRain"
+msgstr "Імовірність опадів"
+
+msgid "element_text_id_rainfall"
+msgstr "Опади"

@@ -1,0 +1,225 @@
+msgid "lang"
+msgstr "ru"
+
+msgid "get_geo"
+msgstr "Определить координаты"
+
+msgid "update_geo"
+msgstr "Обновить координаты"
+
+msgid "start_service"
+msgstr "Работать в фоне"
+
+msgid "stop_service"
+msgstr "Остановить работу в фоне"
+
+msgid "start_alarm_service"
+msgstr "Запускать для обновления"
+
+msgid "stop_alarm_service"
+msgstr "Не запускать для обновления"
+
+msgid "bg_servise_hint"
+msgstr "Постоянная работа приложения в фоне более стабильна.\nПериодический запуск приложения для обновления данных не мешает другим приложениям работать в фоне."
+
+msgid "latitude"
+msgstr "Широта"
+
+msgid "longitude"
+msgstr "Долгота"
+
+msgid "city"
+msgstr "Город"
+
+msgid "rain"
+msgstr "Осадки"
+
+msgid "chanceOfRain"
+msgstr "Вероятность осадков"
+
+msgid "visibility"
+msgstr "Видимость"
+
+msgid "timezone"
+msgstr "Часовой пояс"
+
+msgid "rise"
+msgstr "Восход"
+
+msgid "set"
+msgstr "Закат"
+
+msgid "coord_not_update"
+msgstr "Необходимо определить координаты"
+
+msgid "weather_update"
+msgstr "Погода обновлена"
+
+msgid "forecast_update"
+msgstr "Прогноз обновлен"
+
+msgid "weather_title"
+msgstr "Погода"
+
+msgid "forecast_title"
+msgstr "Прогноз погоды"
+
+msgid "m_s"
+msgstr " м/с"
+
+msgid "kph"
+msgstr " км/ч"
+
+msgid "mph"
+msgstr " mph"
+
+msgid "meter"
+msgstr " м"
+
+msgid "mm"
+msgstr " мм"
+
+msgid "km"
+msgstr " км"
+
+msgid "mile"
+msgstr " miles"
+
+msgid "mmHg"
+msgstr " мм.рт.ст"
+
+msgid "temperature"
+msgstr "Температура"
+
+msgid "feels"
+msgstr "Ощущается"
+
+msgid "humidity"
+msgstr "Влажность"
+
+msgid "wind"
+msgstr "Ветер"
+
+msgid "pressure"
+msgstr "Давление"
+
+msgid "UVI"
+msgstr "УФ-индекс"
+
+msgid "cloudiness"
+msgstr "Облачность"
+
+msgid "tame_update"
+msgstr "Время обновления"
+
+msgid "site_OpenWeather_API"
+msgstr "OpenWeather (API)"
+
+msgid "site_AccuWeather"
+msgstr "AccuWeather"
+
+msgid "site_AccuWeather_API"
+msgstr "AccuWeather (API)"
+
+msgid "APIkey_invalide"
+msgstr "Введите правильный API key в настройках (в приложении Zepp)"
+
+msgid "zepp_disconnected"
+msgstr "Нет связи с Zepp"
+
+msgid "month_0"
+msgstr "января"
+
+msgid "month_1"
+msgstr "февраля"
+
+msgid "month_2"
+msgstr "марта"
+
+msgid "month_3"
+msgstr "апреля"
+
+msgid "month_4"
+msgstr "мая"
+
+msgid "month_5"
+msgstr "июня"
+
+msgid "month_6"
+msgstr "июля"
+
+msgid "month_7"
+msgstr "августа"
+
+msgid "month_8"
+msgstr "сентября"
+
+msgid "month_9"
+msgstr "октября"
+
+msgid "month_10"
+msgstr "ноября"
+
+msgid "month_11"
+msgstr "декабря"
+
+msgid "day_of_week_0"
+msgstr "Вс"
+
+msgid "day_of_week_1"
+msgstr "Пн"
+
+msgid "day_of_week_2"
+msgstr "Вт"
+
+msgid "day_of_week_3"
+msgstr "Ср"
+
+msgid "day_of_week_4"
+msgstr "Чт"
+
+msgid "day_of_week_5"
+msgstr "Пт"
+
+msgid "day_of_week_6"
+msgstr "Сб"
+
+msgid "settings_update"
+msgstr "Настройки синхронизированы"
+
+msgid "graf_hint"
+msgstr "Прогноз погоды на 5 дней"
+
+msgid "number_of_requests"
+msgstr "Превышен лимит запросов"
+
+
+
+
+// не переводить
+msgid "element_text_id_UVI"
+msgstr "УФ-индекс"
+
+msgid "element_text_id_windSpeed"
+msgstr "Ветер"
+
+msgid "element_text_id_windGusts"
+msgstr "Порывы ветра"
+
+msgid "element_text_id_humidity"
+msgstr "Влажность"
+
+msgid "element_text_id_pressure"
+msgstr "Давление"
+
+msgid "element_text_id_cloudiness"
+msgstr "Облачность"
+
+msgid "element_text_id_visibility"
+msgstr "Видимость"
+
+msgid "element_text_id_chanceOfRain"
+msgstr "Вероятность осадков"
+
+msgid "element_text_id_rainfall"
+msgstr "Осадки"

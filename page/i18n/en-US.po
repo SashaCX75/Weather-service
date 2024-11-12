@@ -1,0 +1,225 @@
+msgid "lang"
+msgstr "en"
+
+msgid "get_geo"
+msgstr "Find coordinates"
+
+msgid "update_geo"
+msgstr "Update coordinates"
+
+msgid "start_service"
+msgstr "Run in the background"
+
+msgid "stop_service"
+msgstr "Stop running in the background"
+
+msgid "start_alarm_service"
+msgstr "Run for updates"
+
+msgid "stop_alarm_service"
+msgstr "Do not run for updates"
+
+msgid "bg_servise_hint"
+msgstr "Running an application constantly in the background is more stable.\nPeriodically launching an application to update data does not prevent other applications from running in the background."
+
+msgid "latitude"
+msgstr "Latitude"
+
+msgid "longitude"
+msgstr "Longitude"
+
+msgid "city"
+msgstr "City"
+
+msgid "rain"
+msgstr "Precipitation"
+
+msgid "chanceOfRain"
+msgstr "Probability of precipitation"
+
+msgid "visibility"
+msgstr "Visibility"
+
+msgid "timezone"
+msgstr "Time zone"
+
+msgid "rise"
+msgstr "Rise"
+
+msgid "set"
+msgstr "Set"
+
+msgid "coord_not_update"
+msgstr "Coordinates need to be determined"
+
+msgid "weather_update"
+msgstr "Weather updated"
+
+msgid "forecast_update"
+msgstr "Forecast updated"
+
+msgid "weather_title"
+msgstr "Weather"
+
+msgid "forecast_title"
+msgstr "Weather forecast"
+
+msgid "m_s"
+msgstr " m/s"
+
+msgid "kph"
+msgstr " km/h"
+
+msgid "mph"
+msgstr " mph"
+
+msgid "meter"
+msgstr " m"
+
+msgid "mm"
+msgstr " mm"
+
+msgid "km"
+msgstr " km"
+
+msgid "mile"
+msgstr " miles"
+
+msgid "mmHg"
+msgstr " mmHg"
+
+msgid "temperature"
+msgstr "Temperature"
+
+msgid "feels"
+msgstr "Feels like"
+
+msgid "humidity"
+msgstr "Humidity"
+
+msgid "wind"
+msgstr "Wind"
+
+msgid "pressure"
+msgstr "Pressure"
+
+msgid "UVI"
+msgstr "UV index"
+
+msgid "cloudiness"
+msgstr "Cloudiness"
+
+msgid "tame_update"
+msgstr "Update time"
+
+msgid "site_OpenWeather_API"
+msgstr "OpenWeather (API)"
+
+msgid "site_AccuWeather"
+msgstr "AccuWeather"
+
+msgid "site_AccuWeather_API"
+msgstr "AccuWeather (API)"
+
+msgid "APIkey_invalide"
+msgstr "Enter the correct API key in the settings (in the Zepp app)"
+
+msgid "zepp_disconnected"
+msgstr "No contact with Zepp"
+
+msgid "month_0"
+msgstr "January"
+
+msgid "month_1"
+msgstr "February"
+
+msgid "month_2"
+msgstr "March"
+
+msgid "month_3"
+msgstr "April"
+
+msgid "month_4"
+msgstr "May"
+
+msgid "month_5"
+msgstr "June"
+
+msgid "month_6"
+msgstr "July"
+
+msgid "month_7"
+msgstr "August"
+
+msgid "month_8"
+msgstr "September"
+
+msgid "month_9"
+msgstr "October"
+
+msgid "month_10"
+msgstr "November"
+
+msgid "month_11"
+msgstr "December"
+
+msgid "day_of_week_0"
+msgstr "Sun"
+
+msgid "day_of_week_1"
+msgstr "Mon"
+
+msgid "day_of_week_2"
+msgstr "Tue"
+
+msgid "day_of_week_3"
+msgstr "Wed"
+
+msgid "day_of_week_4"
+msgstr "Thu"
+
+msgid "day_of_week_5"
+msgstr "Fri"
+
+msgid "day_of_week_6"
+msgstr "Sat"
+
+msgid "settings_update"
+msgstr "Settings synchronised"
+
+msgid "graf_hint"
+msgstr "Weather forecast for 5 days"
+
+msgid "number_of_requests"
+msgstr "Request limit exceeded"
+
+
+
+
+// не переводить
+msgid "element_text_id_UVI"
+msgstr "UV Index"
+
+msgid "element_text_id_windSpeed"
+msgstr "Wind"
+
+msgid "element_text_id_windGusts"
+msgstr "Wind Gusts"
+
+msgid "element_text_id_humidity"
+msgstr "Humidity"
+
+msgid "element_text_id_pressure"
+msgstr "Pressure"
+
+msgid "element_text_id_cloudiness"
+msgstr "Cloud Cover"
+
+msgid "element_text_id_visibility"
+msgstr "Visibility"
+
+msgid "element_text_id_chanceOfRain"
+msgstr "Probability of Precipitation"
+
+msgid "element_text_id_rainfall"
+msgstr "Precipitation"

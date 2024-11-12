@@ -1,0 +1,77 @@
+{
+  "configVersion": "v3",
+  "app": {
+    "appId": 1065824,
+    "appName": "Weather Forecast",
+    "appType": "app",
+    "version": {
+      "code": 1,
+      "name": "1.0.0"
+    },
+    "icon": "icon.png",
+    "vender": "SashaCX75",
+    "description": "Weather Forecast application"
+  },
+  "permissions": [
+    "data:os.device.info",
+    "device:os.alarm",
+    "device:os.geolocation",
+    "device:os.notification",
+    "device:os.bg_service"
+  ],
+  "runtime": {
+    "apiVersion": {
+      "compatible": "3.0.0",
+      "target": "3.0.0",
+      "minVersion": "3.0"
+    }
+  },
+  "targets": {
+    "default": {
+      "module": {
+        "page": {
+          "pages": [
+            "page/index",
+            "page/info",
+            "page/graf",
+            "page/settings"
+          ]
+        },
+        "app-service": {
+            "services": [
+              "app-service/weather_service",
+              "app-service/weather_alarm_service"
+          ]
+        },
+        "app-side": {
+           "path": "app-side/index"
+         },
+         "setting": { 
+          "path": "setting/index" 
+        }
+      },
+      "platforms": [
+        {
+          "st": "r",
+          "dw": 480
+        },
+        {
+          "st": "s",
+          "dw": 480
+        }
+      ]
+    }
+  },
+  "i18n": {
+    "en-US": {
+      "appName": "Weather service"
+    },
+    "ru-RU": {
+      "appName": "Погодный сервис"
+    },
+    "uk-UA": {
+      "appName": "Погодний сервіс"
+    }
+  },
+  "defaultLanguage": "en-US"
+}

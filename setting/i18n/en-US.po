@@ -1,0 +1,17 @@
+msgid "latitude"
+msgstr "Latitude"
+
+msgid "longitude"
+msgstr "Longitude"
+
+msgid "get_gps"
+msgstr "Get coordinates"
+
+msgid "gps_error"
+msgstr "Cannot get GPS coordinates"
+
+msgid "apiKey_hint"
+msgstr "To get the API Key you have to register yourself as a developer on the right site and get it in the settings."
+
+msgid "gps_hint"
+msgstr "After changing coordinates, go to the settings in the app on the watch and wait for the weather update message."
