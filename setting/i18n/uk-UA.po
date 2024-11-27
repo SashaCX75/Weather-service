@@ -15,3 +15,12 @@ msgstr "Для отримання API Key ви повинні самостійн
 
 msgid "gps_hint"
 msgstr "Після зміни координат зайдіть у налаштування в застосунку на годиннику і дочекайтеся повідомлення про оновлення погоди."
+
+msgid "GitHub_instruction"
+msgstr "Інструкція з використання даних додатка в циферблатах"
+
+msgid "GitHub_URL"
+msgstr "https://SashaCX75.github.io/Weathe-servic_instruction/ru/"
+
+msgid "Donate"
+msgstr "Якщо вам подобається додаток, то ви можете пожертвувати автору на каву"

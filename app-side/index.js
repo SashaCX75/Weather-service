@@ -915,7 +915,7 @@ function parseWeather_AccuWeather(htmlStr) {
         // logger.log(`app-side element = ${element}`);
         if (element.indexOf(text_id.element_text_id_UVI) > 0) {
           data.uvi = parseInt(element.match(/\d+/)[0]);
-          logger.log(`app-side CurrentWeather UVI = ${data.uvi}`);
+          // logger.log(`app-side CurrentWeather UVI = ${data.uvi}`);
         }
 
         if (element.indexOf(text_id.element_text_id_windSpeed) > 0 && element.indexOf(text_id.element_text_id_windGusts) < 0) {
@@ -951,7 +951,7 @@ function parseWeather_AccuWeather(htmlStr) {
 
         if (!data.humidity && element.indexOf(text_id.element_text_id_humidity) > 0) {
           data.humidity = parseInt(element.match(/\d+/)[0]);
-          logger.log(`app-side CurrentWeather humidity = ${data.humidity}`);
+          // logger.log(`app-side CurrentWeather humidity = ${data.humidity}`);
         }
 
         if (element.indexOf(text_id.element_text_id_pressure) > 0) {
@@ -975,7 +975,7 @@ function parseWeather_AccuWeather(htmlStr) {
 
         if (element.indexOf(text_id.element_text_id_cloudiness) > 0) {
           data.cloudiness = parseInt(element.match(/\d+/)[0]);
-          logger.log(`app-side CurrentWeather cloudiness = ${data.cloudiness}`);
+          // logger.log(`app-side CurrentWeather cloudiness = ${data.cloudiness}`);
         }
 
         if (element.indexOf(text_id.element_text_id_visibility) > 0) {
@@ -1057,19 +1057,19 @@ function parseWeather_AccuWeather(htmlStr) {
 
         if (!data.chanceOfRain && element.indexOf(text_id.element_text_id_chanceOfRain) > 0) {
           data.chanceOfRain = parseInt(element.match(/\d+/)[0]);
-          logger.log(`app-side DayOrNight chanceOfRain = ${data.chanceOfRain}`);
+          // logger.log(`app-side DayOrNight chanceOfRain = ${data.chanceOfRain}`);
         }
 
         if (!data.rainfall && element.indexOf(text_id.element_text_id_rainfall) > 0 && element.indexOf(text_id.element_text_id_chanceOfRain) < 0) {
           let rainfall_values = parseFloat(element.match(/\d?[\.\,]?\d+/)[0]);
           if (imperialUnit) rainfall_values = inchesToMillimeters(rainfall_values);
           data.rainfall = rainfall_values;
-          logger.log(`app-side DayOrNight rainfall = ${data.rainfall}`);
+          // logger.log(`app-side DayOrNight rainfall = ${data.rainfall}`);
         }
 
         if (!data.humidity && element.indexOf(text_id.element_text_id_humidity) > 0) {
           data.humidity = parseInt(element.match(/\d+/)[0]);
-          logger.log(`app-side DayOrNight humidity = ${data.humidity}`);
+          // logger.log(`app-side DayOrNight humidity = ${data.humidity}`);
         }
 
         // if (element.indexOf(text_id.element_text_id_pressure) > 0) {
@@ -1091,7 +1091,7 @@ function parseWeather_AccuWeather(htmlStr) {
 
         if (!data.cloudiness && element.indexOf(text_id.element_text_id_cloudiness) > 0) {
           data.cloudiness = parseInt(element.match(/\d+/)[0]);
-          logger.log(`app-side DayOrNight cloudiness = ${data.cloudiness}`);
+          // logger.log(`app-side DayOrNight cloudiness = ${data.cloudiness}`);
         }
 
         if (!data.visibility && element.indexOf(text_id.element_text_id_visibility) > 0) {

@@ -49,6 +49,7 @@ let imgClouds_1;
 let imgClouds_2;
 
 let thunderstorm;
+let fog_img
 
 
 //#region functions
@@ -381,6 +382,12 @@ function updateWidget() {
 
   if (weatherJson != undefined && weatherJson != null) {
     if (weatherJson.weatherIcon == 8) thunderstorm.setProperty(prop.ANIM_STATUS, anim_status.START);
+
+    let fog_src = 'transparent_img.png';
+    if (weatherJson.weatherIcon == 13) fog_src = 'weather_img/fog.png'
+    if (weatherJson.weatherIcon == 14) fog_src = 'weather_img/wind.png'
+    logger.log(`fog_src = ${fog_src}`);
+    fog_img.setProperty(prop.MORE, {src: fog_src});
   }
 }
 
@@ -526,7 +533,6 @@ function SunMoonPosition (pod) {
 
 function GetCloudiness() {
   logger.log(`GetCloudiness`);
-  if (isSimulator()) return 0;
   let cloudiness_index = 0;
   if (weatherJson != undefined && weatherJson != null) {
     if (isFinite(weatherJson.cloudiness)) {
@@ -537,39 +543,40 @@ function GetCloudiness() {
       logger.log(`cloudiness = ${cloudiness}, cloudiness_index = ${cloudiness_index}`);
     }
   }
+  if (isSimulator()) return 0;
   return cloudiness_index;
 }
 
 function GetSnow() {
-  logger.log(`GetSnow`);
-  if (isSimulator()) return 0;
+  logger.log(`GetSnow`)
   let snow_index = 0;
   if (weatherJson != undefined && weatherJson != null) {
     if (isFinite(weatherJson.weatherIcon)) {
       let weatherIcon = weatherJson.weatherIcon;
       if (weatherIcon == 9 || weatherIcon == 12) snow_index = 1;
-      if (weatherIcon == 10) cloudiness_index = 2;
-      if (weatherIcon == 11) cloudiness_index = 3;
+      if (weatherIcon == 10) snow_index = 2;
+      if (weatherIcon == 11) snow_index = 3;
       logger.log(`weatherIcon = ${weatherIcon}, snow_index = ${snow_index}`);
     }
   }
+  if (isSimulator()) return 0;
   return snow_index;
   // return 3;
 }
 
 function GetRain() {
-  logger.log(`GetRain`);
-  if (isSimulator()) return 0;
+  logger.log(`GetRain`)
   let rain_index = 0;
   if (weatherJson != undefined && weatherJson != null) {
     if (isFinite(weatherJson.weatherIcon)) {
       let weatherIcon = weatherJson.weatherIcon;
       if (weatherIcon == 5 || weatherIcon == 12) rain_index = 1;
-      if (weatherIcon == 6) cloudiness_index = 2;
-      if (weatherIcon == 7) cloudiness_index = 3;
+      if (weatherIcon == 6) rain_index = 2;
+      if (weatherIcon == 7) rain_index = 3;
       logger.log(`weatherIcon = ${weatherIcon}, rain_index = ${rain_index}`);
     }
   }
+  if (isSimulator()) return 0;
   return rain_index;
   // return 3;
 }
@@ -1366,13 +1373,13 @@ Page(BasePage({
     setScrollLock({ lock: true });
     setPageBrightTime({ brightTime: 60000 })
 
-    const viewContainer = createWidget(widget.VIEW_CONTAINER, {
-      x: 0,
-      y: 0,
-      w: DEVICE_WIDTH,
-      h: DEVICE_HEIGHT - px(60),
-      bounce: 0,
-    });
+    // const viewContainer = createWidget(widget.VIEW_CONTAINER, {
+    //   x: 0,
+    //   y: 0,
+    //   w: DEVICE_WIDTH,
+    //   h: DEVICE_HEIGHT - px(60),
+    //   bounce: 0,
+    // });
 
     let pod = DayOrNight();
     logger.log(`pod = ${pod}`);
@@ -1607,6 +1614,12 @@ Page(BasePage({
     if (weatherJson != undefined && weatherJson != null) {
       if (weatherJson.weatherIcon == 8) thunderstorm.setProperty(prop.ANIM_STATUS, anim_status.START);
     }
+
+    fog_img = createWidget(widget.IMG, {
+      x: 0,
+      y: 0,
+      src: 'transparent_img.png',
+    });
 
     if (lastUpdateDiffTime() >= 15) {
       logger.log(`нужно обновить погоду`);

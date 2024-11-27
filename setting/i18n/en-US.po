@@ -15,3 +15,12 @@ msgstr "To get the API Key you have to register yourself as a developer on the r
 
 msgid "gps_hint"
 msgstr "After changing coordinates, go to the settings in the app on the watch and wait for the weather update message."
+
+msgid "GitHub_instruction"
+msgstr "Instructions for using the application data in watch faces"
+
+msgid "GitHub_URL"
+msgstr "https://SashaCX75.github.io/Weathe-servic_instruction/en/"
+
+msgid "Donate"
+msgstr "If you like the app, you can donate to the author for coffee"

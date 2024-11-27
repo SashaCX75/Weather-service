@@ -299,7 +299,7 @@ Page(BasePage({
       }
     }
 
-	// City
+		// City
     createWidget(widget.TEXT, {
 			x: (DEVICE_WIDTH - px(210)) / 2,
 			y: px(20),
@@ -436,6 +436,7 @@ Page(BasePage({
 			else if (currentDateFormat === DATE_FORMAT_YMD || currentDateFormat === DATE_FORMAT_MDY) {
 				timeStr = getText('month_' + weatherTime.getMonth()) + ', ' + weatherTime.getDate() + ', ' + weatherTime.getFullYear();
 			}
+			// timeStr = weatherTime.getDate() + ' ' + getText('month_' + weatherTime.getMonth()) + ' ' + weatherTime.getFullYear();
 			let hour = weatherTime.getHours();
 			let minute = weatherTime.getMinutes();
 			const time = new Time();

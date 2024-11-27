@@ -91,7 +91,9 @@ AppService(
           updateWeather(type);
         }
         else exit();
-      } catch (error) {}
+      } catch (error) {
+        exit();
+      }
     },
 
     onInit(e) {
@@ -103,7 +105,9 @@ AppService(
           updateWeather(type);
         }
         else exit();
-      } catch (error) {}
+      } catch (error) {
+        exit();
+      }
       // exit();
 
       // this.getDataFromNetwork('weather');

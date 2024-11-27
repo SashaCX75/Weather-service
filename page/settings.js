@@ -1039,7 +1039,7 @@ Page(
         x: (DEVICE_WIDTH - px(400)) / 2,
         y: px(580),
         w: px(400), 
-        h: px(130),
+        h: px(140),
         text: getText("bg_servise_hint"),
         color: 0xffffff,
         text_size: px(18),
@@ -1050,7 +1050,7 @@ Page(
       SetSlideStyle();
       //#endregion
 
-      let site_block_offset = px(720);
+      let site_block_offset = px(730);
       //#region разделитель 2
       viewContainer.createWidget(widget.FILL_RECT, {
         x: (DEVICE_WIDTH - px(400)) / 2,
@@ -1095,6 +1095,42 @@ Page(
       //   color: 0x000000
       // })
       // temp_mask.setAlpha(150);
+
+      //#region разделитель 3
+      viewContainer.createWidget(widget.FILL_RECT, {
+        x: (DEVICE_WIDTH - px(400)) / 2,
+        y: site_block_offset + px(320),
+        w: px(400),
+        h: 3,
+        color: 0xa0a0a0
+      })
+      //#endregion
+
+      //#region Donate
+      viewContainer.createWidget(widget.TEXT, {
+        x: (DEVICE_WIDTH - px(400)) / 2,
+        y: site_block_offset + px(340),
+        w: px(400), 
+        h: px(100),
+        text: getText("Donate"),
+        color: 0xffffff,
+        text_size: px(26),
+        line_space: -10,
+        align_h: align.CENTER_H,
+        align_v: align.CENTER_V,
+        text_style: text_style.WRAP,
+      });
+
+      viewContainer.createWidget(widget.IMG, {
+        x: (DEVICE_WIDTH - px(250)) / 2,
+        y: site_block_offset + px(450),
+        w: px(250),
+        h: px(250),
+        src: 'bmc_qr.png',
+        auto_scale: true,
+        auto_scale_obj_fit: true,
+      })
+      //#endregion
 
       //#region Кнопка Назад
       createWidget(widget.BUTTON, {

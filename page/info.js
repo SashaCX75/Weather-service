@@ -886,7 +886,7 @@ Page(BasePage({
             else if (currentDateFormat === DATE_FORMAT_YMD || currentDateFormat === DATE_FORMAT_MDY) {
               dateStr = (weatherTime.getMonth()+1).toString() + '/' + weatherTime.getDate();
             }
-
+            // dateStr = weatherTime.getDate() + '.' + (weatherTime.getMonth()+1).toString();
           }
 
           if (isFinite(forecast_element.weatherIcon)) {

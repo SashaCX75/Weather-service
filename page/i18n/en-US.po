@@ -193,6 +193,9 @@ msgstr "Weather forecast for 5 days"
 msgid "number_of_requests"
 msgstr "Request limit exceeded"
 
+msgid "Donate"
+msgstr "If you like the app, you can donate to the author for coffee"
+
 
 
 
