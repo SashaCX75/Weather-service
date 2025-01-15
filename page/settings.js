@@ -156,8 +156,8 @@ function updateURL(/*context,*/ new_site, lat = 0, lon = 0) {
     let cnt = 40;
     ///
 
-    globalData.urlByGeoWeather = `https://ru.api.openweathermap.org:443/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${APIkey}&units=${units}&lang=${lang}`;
-    globalData.urlByGeoForecast = `https://ru.api.openweathermap.org:443/data/2.5/forecast?lat=${lat}&lon=${lon}&cnt=${cnt}&appid=${APIkey}&units=${units}&lang=${lang}`;
+    globalData.urlByGeoWeather = `https://api.openweathermap.org:443/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${APIkey}&units=${units}&lang=${lang}`;
+    globalData.urlByGeoForecast = `https://api.openweathermap.org:443/data/2.5/forecast?lat=${lat}&lon=${lon}&cnt=${cnt}&appid=${APIkey}&units=${units}&lang=${lang}`;
     globalData.site = new_site;
     globalData.storage.setKey("urlByGeoWeather", globalData.urlByGeoWeather);
     globalData.storage.setKey("urlByGeoForecast", globalData.urlByGeoForecast);

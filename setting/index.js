@@ -513,6 +513,59 @@ AppSettingsPage({
           ]
         )
       ),
+      // разделитель
+      views.push(
+        View(
+          {
+            style: {
+              overflow: "hidden",
+              top: "10px",
+              right: "5px",
+              background: "#3443dc",
+              color: "white",
+              fontSize: "12px",
+              lineHeight: "30px",
+              padding: "0 15px",
+              minHeight: "2px",
+              marginBottom: "15px",
+            },
+          },
+          []
+        )
+      ),
+      // ссылка на Buy Me a Coffee
+      views.push(
+        View(
+          {
+            style: {
+              // textIndent: "15px",
+              textAlign: "center",
+              padding: "0 5px",
+              marginTop: "15px",
+              marginBottom: "15px",
+            },
+          },
+          [
+            Text(
+              {
+                // align: "left",
+                style: {
+                  textAlign: "center",
+                  display: "block",
+                  marginBottom: "5px",
+                },
+              },
+              gettext("contacts")
+            ),
+            Link(
+              {
+                source: "mailto:SashaCX75@gmail.com",
+              },
+              "e-mail: SashaCX75@gmail.com"
+            ),
+          ]
+        )
+      ),
       
       ////
       View(

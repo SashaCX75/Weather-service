@@ -24,3 +24,6 @@ msgstr "https://SashaCX75.github.io/Weathe-servic_instruction/en/"
 
 msgid "Donate"
 msgstr "If you like the app, you can donate to the author for coffee"
+
+msgid "contacts"
+msgstr "If you have any questions or suggestions you can contact me"

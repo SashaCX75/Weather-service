@@ -67,6 +67,7 @@ async function fetchData(res, url, site, type, globalData) {
     });
   } catch (error) {
     logger.log(`app-side fetchData ERROR = ${error}`);
+    logger.log(`app-side fetchData ERROR.stringify = ${JSON.stringify(error)}`);
     res(null, {
       status: "error",
       error: `ERROR = ${error}`,
