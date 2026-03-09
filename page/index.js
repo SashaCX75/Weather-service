@@ -1626,6 +1626,7 @@ Page(BasePage({
       this.getDataFromNetwork("weather");
       logger.log(`погода обновлена`);
     }
+    // this.getDataFromNetwork("weather");
     
     updateWidget();
       

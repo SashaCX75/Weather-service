@@ -1,6 +1,9 @@
 msgid "lang"
 msgstr "ru"
 
+msgid "lang_sinoptik"
+msgstr "rus"
+
 msgid "get_geo"
 msgstr "Определить координаты"
 
@@ -79,6 +82,9 @@ msgstr " м"
 msgid "mm"
 msgstr " мм"
 
+msgid "in"
+msgstr " ″"
+
 msgid "km"
 msgstr " км"
 
@@ -120,6 +126,9 @@ msgstr "AccuWeather"
 
 msgid "site_AccuWeather_API"
 msgstr "AccuWeather (API)"
+
+msgid "site_Sinoptik"
+msgstr "Sinoptik"
 
 msgid "APIkey_invalide"
 msgstr "Введите правильный API key в настройках (в приложении Zepp)"
@@ -192,6 +201,9 @@ msgstr "Прогноз погоды на 5 дней"
 
 msgid "number_of_requests"
 msgstr "Превышен лимит запросов"
+
+msgid "site_error"
+msgstr "Ошибка получения данных"
 
 msgid "Donate"
 msgstr "Если вам нравится приложение, то вы можете пожертвовать автору на кофе"

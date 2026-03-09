@@ -75,17 +75,30 @@ async function fetchData(res, url, site, type, globalData) {
   }
 }
 
-async function fetchLocation(res, url, site) {
-  logger.log(`app-side fetchLocation() url = ${url},site = ${site}`);
-  // logger.log(`app-side fetchLocation() type = ${type}`);
+async function fetchLocation(res, url, site, body_request) {
+  logger.log(`app-side fetchLocation() url = ${url}, site = ${site}`);
   try {
-    const response = await fetch({
-      url: url,
-      method: "GET",
-      headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; ZeppOS/1.0)",
-      },
-    });
+    let response;
+    if (site == "Sinoptik") {
+      logger.log(`app-side fetchLocation() body_request = ${body_request}`);
+      response = await fetch({
+        url: url,
+        method: "POST",
+        headers: {
+          "User-Agent": "Mozilla/5.0 (compatible; ZeppOS/1.0)",
+        },
+        body: body_request
+      });
+    }
+    else {
+      response = await fetch({
+        url: url,
+        method: "GET",
+        headers: {
+          "User-Agent": "Mozilla/5.0 (compatible; ZeppOS/1.0)",
+        },
+      });
+    }
     logger.log(`app-side response.status = ${response.status}`);
     // logger.log(`app-side response.body = ${response.body}`);
 
@@ -142,7 +155,7 @@ async function fetchLocation(res, url, site) {
       };
     }
 
-    if (site == "AccuWeather_API") {;
+    if (site == "AccuWeather_API") {
       // body = http://dataservice.accuweather.com/locations/v1/cities/geoposition/search?apikey=apikeyf&q=50.5,-0.5&language=ru
       let responseJSON = body;
       if (typeof body === 'string') responseJSON = JSON.parse(body);
@@ -170,6 +183,23 @@ async function fetchLocation(res, url, site) {
       } catch (error) {
         throw new Error(
           `AccuWeather_API parse json error: ${error}`
+        );
+      }
+    }
+
+    if (site == "Sinoptik") {
+      let responseJSON = body;
+      if (typeof body === 'string') responseJSON = JSON.parse(body);
+      // logger.log(`app-side fetchLocation responseJSON = ${JSON.stringify(responseJSON)}`);
+      data = {};
+      try {
+        if (responseJSON.location) {
+          data.city_key = responseJSON.location.id;
+          data.city_name = responseJSON.location.title;
+        }
+      } catch (error) {
+        throw new Error(
+          `Sinoptik_API parse json error: ${error}`
         );
       }
     }
@@ -867,9 +897,12 @@ function parseWeather_AccuWeather(htmlStr) {
 
       //#region Температура
       let str_weather_info_class = str_current.match( /class="current-weather-info">(.*?)<div class="current-weather-extra no-realfeel-phrase">/gs)[0];
+      // logger.log(`app-side str_weather_info_class = ${str_weather_info_class}`);
       data.weatherDescriptionExtended = str_weather_info_class.match( /<div class="phrase">(.*?)<\/div>/s)[1]; // описание погоды
+      // logger.log(`app-side weatherDescriptionExtended = ${data.weatherDescriptionExtended}`);
       // Иконка
-      let weather_icon = parseInt(str_current.match( /data-src="[\D]*(\d+).svg"/)[1]);
+      // let weather_icon = parseInt(str_current.match( /data-src="[\D]*(\d+).svg"/)[1]);
+      let weather_icon = parseInt(str_current.match( /data-src="[^"]*\/(\d+)\.svg"/)[1]);
       let value = iconFrom_AccuWeather(weather_icon);
       // logger.log(`app-side weather_icon value = ${JSON.stringify(value)}, weather_icon = ${weather_icon}`);
       data.weatherIcon = value.index;
@@ -1352,7 +1385,8 @@ function parseForecast_AccuWeather(htmlStr) {
       //#endregion
 
       //#region иконка погоды
-      let weather_icon = parseInt(dayStr.match( /data-src="[\D]*(\d+).svg"/s)[1]);
+      let weather_icon = parseInt(dayStr.match( /data-src="[^"]*\/(\d+)\.svg"/s)[1]);
+      // let weather_icon = parseInt(dayStr.match( /data-src="[\D]*(\d+).svg"/s)[1]);
       let value = iconFrom_AccuWeather(weather_icon);
       forecast_json.weatherIcon = value.index;
       forecast_json.weatherIconPeriod = value.time_of_day;
@@ -1790,7 +1824,7 @@ AppSideService(
         fetchData(res, req.url, req.site, req.type, req.globalData);
       }
       if (req.method === "GET_location") {
-        fetchLocation(res, req.url, req.site);
+        fetchLocation(res, req.url, req.site, req.body);
       }
       if (req.method === "GET_settings") {
         let result = {

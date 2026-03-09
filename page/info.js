@@ -85,6 +85,24 @@ function PressureUnit () {
   notif_pressure.updateValue(pressureStr);
 }
 
+
+function RainUnit () {
+  let rain_unit = storage.getKey("rain_unit", 0);
+  rain_unit = ++rain_unit % 2;
+  storage.setKey("rain_unit", rain_unit);
+
+  let rainStr = "--";
+  if (isFinite(weatherJson.rainfall)) {
+    if (rain_unit == 0) {
+      rainStr = parseFloat(weatherJson.rainfall).toFixed(1) + getText('mm');
+    }
+    else if (rain_unit == 1) {
+      rainStr = (parseFloat(weatherJson.rainfall) / 25.4).toFixed(2) + getText('in');
+    }
+  }
+  notif_rain.updateValue(rainStr);
+}
+
 function WindUnit () {
   logger.log(`WindUnit`);
   let wind_unit = storage.getKey("wind_unit", 0);
@@ -289,17 +307,6 @@ class Card {
       src: bg_img,
     });
 
-    // if (day_night) {
-    //   this.mask = group.createWidget(widget.FILL_RECT, {
-    //     x: px(75),
-    //     y: 0,
-    //     w: px(325),
-    //     h: px(190),
-    //     color: 0x000000,
-    //   });
-    //   this.mask.setAlpha(75);
-    // } 
-
     let dayStr = getText(`day_of_week_${dow_index}`);
     logger.log(`dow_index = ${dow_index}, dayStr = ${dayStr}`);
     let color = 0xffffff;
@@ -361,13 +368,6 @@ class Card {
       text: temperature,
     });
 
-    // group.createWidget(widget.FILL_RECT, {
-    //   x: px(200),
-    //   y: px(20),
-    //   w: px(190),
-    //   h: px(100),
-    //   color: 0xff0000,
-    // });
     this.weather_shadow = group.createWidget(widget.TEXT, {
       x: px(190)+2,
       y: px(10)+2,
@@ -614,7 +614,14 @@ Page(BasePage({
         humidityStr = weatherJson.humidity + '%';
       }
       if (isFinite(weatherJson.rainfall)) {
-        rainStr = parseFloat(weatherJson.rainfall).toFixed(1) + getText('mm');
+        // rainStr = parseFloat(weatherJson.rainfall).toFixed(1) + getText('mm');
+        let rain_unit = storage.getKey("rain_unit", 0); 
+        if (rain_unit == 0) {
+          rainStr = parseFloat(weatherJson.rainfall).toFixed(1) + getText('mm');
+        }
+        else if (rain_unit == 1) {
+          rainStr = (parseFloat(weatherJson.rainfall) / 25.4).toFixed(2) + getText('in');
+        }
       }
       if (isFinite(weatherJson.chanceOfRain)) {
         chanceOfRainStr = weatherJson.chanceOfRain + '%';
@@ -830,16 +837,16 @@ Page(BasePage({
     notif_pressure = new Notif(px(55), px(2*80), getText("pressure"), pressureStr, 'weather_img/notif_pressure.png', PressureUnit, viewContainer);
     notif_humidity = new Notif(DEVICE_WIDTH/2 + px(10), px(2*80), getText("humidity"), humidityStr, 'weather_img/notif_humidity.png', undefined, viewContainer);
 
-    notif_rain = new Notif(px(55), px(3*80), getText("rain"), rainStr, rainSrc, PressureUnit, viewContainer);
+    notif_rain = new Notif(px(55), px(3*80), getText("rain"), rainStr, rainSrc, RainUnit, viewContainer);
     notif_chanceOfRain = new Notif(DEVICE_WIDTH/2 + px(10), px(3*80), getText("chanceOfRain"), chanceOfRainStr, chanceOfRainSrc, undefined, viewContainer);
 
     notif_visibility = new Notif(px(55), px(4*80), getText("visibility"), visibilityStr, 'weather_img/notif_visibility.png', DistanceUnit, viewContainer);
     notif_uvi = new Notif(DEVICE_WIDTH/2 + px(10), px(4*80), getText("UVI"), uviStr, 'weather_img/notif_uvindex.png', undefined, viewContainer);
 
-    notif_sunrise = new Notif(px(55), px(5*80), getText("rise"), sunriseStr, 'weather_img/notif_sun.png', PressureUnit, viewContainer);
+    notif_sunrise = new Notif(px(55), px(5*80), getText("rise"), sunriseStr, 'weather_img/notif_sun.png', undefined, viewContainer);
     notif_sunset = new Notif(DEVICE_WIDTH/2 + px(10), px(5*80), getText("set"), sunsetStr, 'weather_img/notif_sun.png', undefined, viewContainer);
 
-    notif_moonrise = new Notif(px(55), px(6*80), getText("rise"), moonriseStr, 'weather_img/notif_moon.png', PressureUnit, viewContainer);
+    notif_moonrise = new Notif(px(55), px(6*80), getText("rise"), moonriseStr, 'weather_img/notif_moon.png', undefined, viewContainer);
     notif_moonset = new Notif(DEVICE_WIDTH/2 + px(10), px(6*80), getText("set"), moonsetStr, 'weather_img/notif_moon.png', undefined, viewContainer);
     
     notif_timezone = new Notif(DEVICE_WIDTH/2 + px(10), px(7*80), getText("timezone"), timezoneStr, 'weather_img/notif_timezone.png', undefined, viewContainer);
@@ -928,13 +935,6 @@ Page(BasePage({
             if (temperature > 0) tempMaxStr = '+' + tempMaxStr;
             // else if (temperature < 0) tempMaxStr = '-' + tempMaxStr;
           }
-          
-          // if (isFinite(forecast_element.humidity)) {
-          //   humidityStr = forecast_element.humidity + '%';
-          // }
-          // if (isFinite(forecast_element.rainfall)) {
-          //   rainStr = forecast_element.rainfall + ' mm';
-          // }
 
           if (isFinite(forecast_element.cloudiness)) {
             cloudinessValue = parseInt(forecast_element.cloudiness);
@@ -943,23 +943,6 @@ Page(BasePage({
           if (isFinite(forecast_element.chanceOfRain)) {
             chanceOfRainValue = parseInt(forecast_element.chanceOfRain);
           }
-
-          // if (isFinite(forecast_element.visibility)) {
-          //   let distance_unit = storage.getKey("distance_unit", 1); 
-          //   if (distance_unit == 0) {
-          //     visibilityStr = forecast_element.visibility  + getText('meter');
-          //   }
-          //   else if (distance_unit == 1) {
-          //     visibilityStr = parseFloat(forecast_element.visibility / 1000).toFixed(1)  + getText('km');
-          //   }
-          //   else if (distance_unit == 2) {
-          //     visibilityStr = parseFloat(forecast_element.visibility / 1609.344).toFixed(1)  + getText('mile');
-          //   }
-          // }
-          // if (isFinite(forecast_element.uvi)) {
-          //   uviStr = forecast_element.uvi;
-          // }
-          
           
           if (isFinite(forecast_element.windSpeed)) {
             let wind_unit = storage.getKey("wind_unit", 0);
@@ -983,59 +966,11 @@ Page(BasePage({
           if (isFinite(forecast_element.windDirection)) {
             windAngle = forecast_element.windDirection;
           }
-          
-          // if (isFinite(forecast_element.pressure)) {
-          //   let pressure_unit = storage.getKey("pressure_unit", 0);
-          //   let pressure = forecast_element.pressure;
-          //   if (pressure_unit == 1) {
-          //     pressure = HpaToMmHg(pressure);
-          //     // pressureStr = pressure + getText('mmHg');
-          //     pressureStr = pressure + ' mmHg';
-          //   }
-          //   else pressureStr = pressure + ' hPa';
-          // }
 
           // logger.log(`cloudiness = ${forecast_element.cloudiness}`);
           if (isFinite(forecast_element.cloudiness)) {
             cloudinessValue = parseInt(forecast_element.cloudiness);
           }
-          
-          // if (isFinite(forecast_element.sunriseTime)) {
-          //   const sunrise = new Date(forecast_element.sunriseTime);
-          //   let hour = sunrise.getHours();
-          //   let minute = sunrise.getMinutes();
-          //   if (time.getHourFormat() == TIME_HOUR_FORMAT_12) {
-          //     let am_pm = 'AM';
-          //     if (hour >= 12) {
-          //       hour -= 12;
-          //       am_pm = 'PM';
-          //     }
-          //     if (hour == 0) {
-          //       hour = 12;
-          //     }
-          //     sunriseStr += hour.toString().padStart(2, '0')  + ':' + minute.toString().padStart(2, '0') + ' ' + am_pm;
-          //   }
-          //   else sunriseStr += hour.toString().padStart(2, '0')  + ':' + minute.toString().padStart(2, '0');
-          //   // sunriseStr = sunrise.getHours().toString().padStart(2, '0') + ':' + sunrise.getMinutes().toString().padStart(2, '0');
-          // }
-          // if (isFinite(forecast_element.sunsetTime)) {
-          //   const sunset = new Date(forecast_element.sunsetTime);
-          //   let hour = sunset.getHours();
-          //   let minute = sunset.getMinutes();
-          //   if (time.getHourFormat() == TIME_HOUR_FORMAT_12) {
-          //     let am_pm = 'AM';
-          //     if (hour >= 12) {
-          //       hour -= 12;
-          //       am_pm = 'PM';
-          //     }
-          //     if (hour == 0) {
-          //       hour = 12;
-          //     }
-          //     sunsetStr += hour.toString().padStart(2, '0')  + ':' + minute.toString().padStart(2, '0') + ' ' + am_pm;
-          //   }
-          //   else sunsetStr += hour.toString().padStart(2, '0')  + ':' + minute.toString().padStart(2, '0');
-          //   // sunsetStr = sunset.getHours().toString().padStart(2, '0') + ':' + sunset.getMinutes().toString().padStart(2, '0');
-          // }
           //#endregion
           
           new Card(
@@ -1058,14 +993,6 @@ Page(BasePage({
           count++;
           
         });
-
-        // viewContainer.createWidget(widget.FILL_RECT, {
-        //   x: 0,
-        //   y: card_offset + count * px(210),
-        //   w: DEVICE_WIDTH,
-        //   h: px(50),
-        //   color: 0x000000
-        // });
 
         viewContainer.createWidget(widget.TEXT, {
           x: 0,

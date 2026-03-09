@@ -187,7 +187,7 @@ function updateURL(/*context,*/ new_site, lat = 0, lon = 0) {
     context.request({
       method: 'GET_location',
       url: url,
-      type: type,
+      // type: type,
       site: 'AccuWeather',
     })
       .then((result) => {
@@ -255,7 +255,7 @@ function updateURL(/*context,*/ new_site, lat = 0, lon = 0) {
     context.request({
       method: 'GET_location',
       url: url,
-      type: type,
+      // type: type,
       site: 'AccuWeather_API',
     })
       .then((result) => {
@@ -287,6 +287,71 @@ function updateURL(/*context,*/ new_site, lat = 0, lon = 0) {
         globalData.storage.setKey("city_name", globalData.city_name);
         globalData.storage.setKey("district", globalData.district);
         globalData.storage.setKey("timeZone", globalData.timeZone);
+        logger.log(`urlByGeoWeather = ${globalData.urlByGeoWeather}`);
+        logger.log(`urlByGeoForecast = ${globalData.urlByGeoForecast}`);
+        logger.log(`site = ${globalData.site}`);
+        
+        context.getDataFromNetwork("weather");
+        return;
+      })
+      .catch((error) => {
+        logger.error("error=>", error);
+      });
+  }
+  if (new_site == 'Sinoptik') {
+    if (!connectStatus()){
+      showToast({ content: getText("zepp_disconnected") });
+      SlideSwitchSelect();
+      AnimationStop();
+      return;
+    }
+    let lang = getText('lang_sinoptik');
+    let url = `https://sinoptik.uk/api/location/determine`
+    logger.log(`GET_location Sinoptik`);
+    context.request({
+      method: 'GET_location',
+      url: url,
+      body: JSON.stringify({
+        coordinates: {
+          lat: lat, 
+          lng: lon
+        }, 
+        lang: "rus" // "ukr" "eng"
+      }),
+      site: 'Sinoptik',
+    })
+      .then((result) => {
+        logger.log("receive location Sinoptik");
+        const { status, data, error } = result;
+        if (status != "success" || Object.keys(data).length < 2) {
+          logger.log(`Sinoptik error => ${JSON.stringify(error)}`);
+          logger.log(`Sinoptik data => ${JSON.stringify(data)}`);
+          showToast({ content: getText("site_error") });
+          SlideSwitchSelect();
+          AnimationStop();
+          return;
+        }
+        logger.log(`result = ${JSON.stringify(result)}`);
+        logger.log(`JSON data = ${JSON.stringify(data)}`);
+        
+        let city_name = data.city_name;
+        let city_key = data.city_key;
+        logger.log(`city_name = ${city_name}`);
+        logger.log(`city_key = ${city_key}`);
+
+        // let lang = globalData.lang;
+        let lang = getText('lang');
+        //  let lang = 'ru';
+        // let lang = 'en';
+
+        globalData.urlByGeoWeather = `https://sinoptik.uk/api/weather/location/forecast/by_id`;
+        globalData.urlByGeoForecast = undefined;
+        globalData.city_key = city_key;
+        globalData.site = new_site;
+        globalData.storage.setKey("urlByGeoWeather", globalData.urlByGeoWeather);
+        globalData.storage.setKey("urlByGeoForecast", globalData.urlByGeoForecast);
+        globalData.storage.setKey("site", globalData.site);
+        globalData.storage.setKey("city_key", globalData.city_key);
         logger.log(`urlByGeoWeather = ${globalData.urlByGeoWeather}`);
         logger.log(`urlByGeoForecast = ${globalData.urlByGeoForecast}`);
         logger.log(`site = ${globalData.site}`);
@@ -544,6 +609,10 @@ function SiteChanged(index) {
     case 2: // AccuWeather_API
       new_site = 'AccuWeather_API';
       break;
+    
+    case 3: // Sinoptik
+      new_site = 'Sinoptik';
+      break;
   }
   
   logger.log(`siteChanged(old_site = ${old_site}, new_site = ${new_site})`);
@@ -564,7 +633,7 @@ function SlideSwitchSelect () {
       select_index = 1;
       break;
       
-    case 'AccuWeather_API':
+    case 'Sinoptik':
       select_index = 2;
       break;
   
@@ -767,7 +836,10 @@ class SlideSwitch {
 
 class RadioBox {
   constructor(y = 0, group_width, layout, text_arrey, src_arrey, select_index = 0) {
+    logger.log(`RadioBox constructor`);
+    logger.log(`text_arrey.length = ${text_arrey.length}, src_arrey.length = ${src_arrey.length}, select_index = ${select_index}`);
     if (text_arrey.length == 0 || src_arrey.length != text_arrey.length ) return;
+    if (select_index < 0 || select_index >= text_arrey.length) select_index = 0;
     this.initialisation = false;
     this.radioGroup;
     this.posX = -1;
@@ -830,39 +902,6 @@ class RadioBox {
           h: px(60),
         })
       );
-
-      // logger.log(`index = ${index}, src = ${src_arrey[index]}`)
-      // radioGroup.createWidget(widget.IMG, {
-      //   x: px(63),
-      //   y: px(index*100 + 15),
-      //   src: 'logo_AccuWeather.png' //src_arrey[index]
-      // });
-
-      // radioGroup.createWidget(widget.TEXT, {
-      //   x: px(100),
-      //   y: px(index*100),
-      //   w: group_width + px(100),
-      //   h: px(80),
-      //   color: 0xffffff,
-      //   text_size: px(28),
-      //   align_h: align.LEFT,
-      //   align_v: align.CENTER_V,
-      //   text_style: text_style.NONE,
-      //   text: text_arrey[index]
-      // });
-
-      // this.stroke_rect = [];
-      // this.stroke_rect.push(
-      //   radioGroup.createWidget(widget.STROKE_RECT, {
-      //     x: 0,
-      //     y: px(index*100),
-      //     w: px(group_width),
-      //     h: px(80),
-      //     radius: px(25),
-      //     line_width: 3,
-      //     color: 0x313131
-      //   })
-      // );
 
     }
 
@@ -1062,6 +1101,8 @@ Page(
       //#endregion
 
       //#region выбор сайта
+      // let text_arrey = [getText("site_OpenWeather_API"), getText("site_AccuWeather"), getText("site_AccuWeather_API"), getText("site_Sinoptik")];
+      // let src_arrey = ['logo_OpenWeather.png', 'logo_AccuWeather.png', 'logo_AccuWeather.png', 'logo_Sinoptik.png'];
       let text_arrey = [getText("site_OpenWeather_API"), getText("site_AccuWeather"), getText("site_AccuWeather_API")];
       let src_arrey = ['logo_OpenWeather.png', 'logo_AccuWeather.png', 'logo_AccuWeather.png'];
       let select_index = 0;
@@ -1077,13 +1118,17 @@ Page(
         case 'AccuWeather_API':
           select_index = 2;
           break;
+          
+        case 'Sinoptik':
+          select_index = 3;
+          break;
       
         default:
           select_index = 0;
           break;
       };
       logger.log(`select_index = ${select_index}`);
-      radioBox = new RadioBox (site_block_offset + px(20), px(370), viewContainer,text_arrey,src_arrey, select_index);
+      radioBox = new RadioBox (site_block_offset + px(20), px(370), viewContainer, text_arrey,src_arrey, select_index);
       //#endregion
 
       // let temp_mask = viewContainer.createWidget(widget.FILL_RECT, {
@@ -1100,6 +1145,7 @@ Page(
       viewContainer.createWidget(widget.FILL_RECT, {
         x: (DEVICE_WIDTH - px(400)) / 2,
         y: site_block_offset + px(320),
+        // y: site_block_offset + px(420),
         w: px(400),
         h: 3,
         color: 0xa0a0a0
@@ -1110,6 +1156,7 @@ Page(
       viewContainer.createWidget(widget.TEXT, {
         x: (DEVICE_WIDTH - px(400)) / 2,
         y: site_block_offset + px(340),
+        // y: site_block_offset + px(440),
         w: px(400), 
         h: px(100),
         text: getText("Donate"),
