@@ -1,156 +1,156 @@
 msgid "cloudMap_clear"
-msgstr "clear"
+msgstr "ясно"
 
 msgid "cloudMap_mostly_clear"
-msgstr "mostly clear"
+msgstr "малохмарно"
 
 msgid "cloudMap_partly_cloudy"
-msgstr "partly cloudy"
+msgstr "мінлива хмарність"
 
 msgid "cloudMap_cloudy"
-msgstr "cloudy"
+msgstr "хмарно"
 
 msgid "cloudMap_overcast"
-msgstr "overcast"
+msgstr "похмуро"
 
 msgid "cloudMap_fog"
-msgstr "fog"
+msgstr "туман"
+
 
 
 msgid "intensityMap_light"
-msgstr "light"
+msgstr "невеликий"
 
 msgid "intensityMap_heavy"
-msgstr "heavy"
+msgstr "сильний"
 
 
 msgid "typeMap_rain"
-msgstr "rain"
+msgstr "дощ"
 
 msgid "typeMap_sleet"
-msgstr "sleet"
+msgstr "мокрий сніг"
 
 msgid "typeMap_snow"
-msgstr "snow"
+msgstr "сніг"
 
 msgid "typeMap_hail"
-msgstr "hail"
-
+msgstr "град"
 
 
 msgid "special_thunderstorm"
-msgstr "thunderstorm"
+msgstr "гроза"
 
 msgid "special_snowfall"
-msgstr "snowfall"
+msgstr "снігопад"
 
 msgid "special_heavy_hail"
-msgstr "heavy hail"
+msgstr "сильний град"
 
 msgid "special_heavy_rainfall"
-msgstr "heavy rainfall"
+msgstr "сильні опади"
 
 msgid "special_sleet"
-msgstr "sleet"
+msgstr "дощ зі снігом"
 
 msgid "special_heavy_sleet"
-msgstr "heavy sleet"
+msgstr "сильний дощ зі снігом"
 
 msgid "precipitation"
-msgstr "precipitation"
+msgstr "опади"
 
 
 
 msgid "openmeteo_clear"
-msgstr "Clear sky"
+msgstr "Ясно"
 
 msgid "openmeteo_mainly_clear"
-msgstr "Mainly clear"
+msgstr "Невелика хмарність"
 
 msgid "openmeteo_partly_cloudy"
-msgstr "Partly cloudy"
+msgstr "Мінлива хмарність"
 
 msgid "openmeteo_overcast"
-msgstr "Overcast"
+msgstr "Хмарно"
 
 
 msgid "openmeteo_fog"
-msgstr "Fog"
+msgstr "Туман"
 
 msgid "openmeteo_depositing_rime"
-msgstr "Depositing rime fog"
+msgstr "Туман з інеєм"
 
 
 msgid "openmeteo_light_drizzle"
-msgstr "Light drizzle"
+msgstr "Слабкий мрячний дощь"
 
 msgid "openmeteo_moderate_drizzle"
-msgstr "Moderate drizzle"
+msgstr "Мряка"
 
 msgid "openmeteo_intensity_drizzle"
-msgstr "Dense intensity drizzle"
+msgstr "Сильний мрячний дощ"
 
 msgid "openmeteo_light_freezing_drizzle"
-msgstr "Light freezing drizzle"
+msgstr "Слабкий крижаний дощ"
 
 msgid "openmeteo_intensity_freezing_drizzle"
-msgstr "Dense intensity freezing drizzle"
+msgstr "Сильний крижаний дощ"
 
 
 msgid "openmeteo_light_rain"
-msgstr "Light rain"
+msgstr "Слабкий дощ"
 
 msgid "openmeteo_moderate_rain"
-msgstr "Moderate rain"
+msgstr "Дощ"
 
 msgid "openmeteo_intensity_rain"
-msgstr "Heavy intensity rain"
+msgstr "Сильний дощ"
 
 msgid "openmeteo_light_freezing_rain"
-msgstr "Light freezing rain"
+msgstr "Слабкий крижаний дощ"
 
 msgid "openmeteo_intensity_freezing_rain"
-msgstr "Heavy intensity freezing rain"
+msgstr "Сильний крижаний дощ"
 
 
 msgid "openmeteo_light_snow"
-msgstr "Light snow"
+msgstr "Несильний сніг"
 
 msgid "openmeteo_moderate_snow"
-msgstr "Moderate snow"
+msgstr "Сніг"
 
 msgid "openmeteo_intensity_snow"
-msgstr "Heavy intensity snow"
+msgstr "Снігопад"
 
 msgid "openmeteo_snow_grains"
-msgstr "Snow grains"
+msgstr "Снігова крупа"
 
 
 msgid "openmeteo_light_rain_showers"
-msgstr "Light rain showers"
+msgstr "Несильний зливовий дощ"
 
 msgid "openmeteo_moderate_rain_showers"
-msgstr "Moderate rain showers"
+msgstr "Злива"
 
 msgid "openmeteo_intensity_rain_showers"
-msgstr "Heavy intensity rain showers"
+msgstr "Сильна злива"
 
 
 msgid "openmeteo_light_snow_showers"
-msgstr "Light snow showers"
+msgstr "Несильний снігопад"
 
 msgid "openmeteo_intensity_snow_showers"
-msgstr "Heavy intensity snow showers"
+msgstr "Сильний снігопад"
 
 
 msgid "openmeteo_thunderstorm"
-msgstr "Thunderstorm"
+msgstr "Гроза"
 
 msgid "openmeteo_thunderstorm_with_hail"
-msgstr "Thunderstorm with hail"
+msgstr "Гроза з градом"
 
 msgid "openmeteo_thunderstorm_with_heavy_hail"
-msgstr "Thunderstorm with heavy hail"
+msgstr "Гроза з сильним градом"
 
 msgid "openmeteo_unknown"
-msgstr "Unknown weather"
+msgstr "Невідома погода"

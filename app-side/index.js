@@ -1,17 +1,56 @@
 import { BaseSideService } from "@zeppos/zml/base-side";
-// const logger = Logger.getLogger("*****message-app-side");
+import { gettext as getText } from 'i18n'
+// const logger = Logger.getLogger("*****⭕message-app-side");
 const logger = console;
 
-async function fetchData(res, url, site, type, globalData) {
+async function fetchData(res, url, site, type, globalData, body_request) {
   logger.log(`app-side fetchData() url = ${url}, site = ${site}, type = ${type}`);
+  logger.log(`app-side body_request = ${body_request}`);
+  if (url == undefined || url.length < 5) throw new Error(`Invalid URL: ${url}`);
   try {
+    // const response = await fetch({
+    //   url: url,
+    //   method: "GET",
+    //   headers: {
+    //     "User-Agent": "Mozilla/5.0",
+    //     // "User-Agent": "Mozilla/5.0 (compatible; ZeppOS/1.0)",
+    //   },
+    // });
+    let headers;
+    let method = "GET";
+    switch (site) {
+      case "AccuWeather":
+      case "AccuWeather_API":
+        headers = {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+          "Accept-Language": "en-US,en;q=0.9,ru;q=0.8",
+          "Referer": "https://www.accuweather.com/",
+          "Connection": "keep-alive",
+          "Upgrade-Insecure-Requests": "1",
+        };
+        break;
+      case "Sinoptik":
+        method = "POST";
+        headers = {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+          "Content-Type": "application/json",
+          "x-requested-with": "XMLHttpRequest"
+        };
+        break;
+    
+      default:
+        break;
+    }
     const response = await fetch({
       url: url,
-      method: "GET",
-      headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; ZeppOS/1.0)",
-      },
-    });
+      method: method,
+      headers: headers,
+      body: body_request,
+    })
+
+    // logger.info(`[I] app-side fetchData() Response: ${JSON.stringify(response)}`);
+    logger.info(`[I] app-side fetchData() response.status = ${JSON.stringify(response.status)}`);
 
     if (response.status == 401 && site == "AccuWeather_API") {
       throw new Error(
@@ -24,6 +63,7 @@ async function fetchData(res, url, site, type, globalData) {
       );
     }
     if (response.status !== 200) {
+      logger.info(`app-side fetchData() ERROR Response: ${JSON.stringify(response)}`);
       throw new Error(
         `Failed to fetch weather page, status code: ${response.status}`
       );
@@ -49,11 +89,21 @@ async function fetchData(res, url, site, type, globalData) {
       if (type == "forecast") weather_json = parseForecast_AccuWeather_API(response.body, globalData);
     }
 
+    if (site == "Sinoptik") {
+      if (type == "weather") weather_json = parseWeather_Sinoptik(response.body);
+    }
+
+    if (site == "OpenMeteo") {
+      if (type == "weather") weather_json = parseWeather_OpenMeteo(response.body, globalData);
+      if (type == "forecast") weather_json = parseForecast_OpenMeteo(response.body, globalData);
+    }
+
     let data = {};
     if (weather_json != null && weather_json != undefined) data = weather_json;
     
     let data_length = Object.keys(data).length;
-    if (data_length < 3) {
+    logger.log(`app-side fetchData() data_length = ${data_length}`);
+    if (data_length < 2) {
       throw new Error(
         `Failed to parse weather_json; data = ${JSON.stringify(data)}`
       );
@@ -66,8 +116,8 @@ async function fetchData(res, url, site, type, globalData) {
       data: data, // Отправляем данные как JSON строку
     });
   } catch (error) {
-    logger.log(`app-side fetchData ERROR = ${error}`);
-    logger.log(`app-side fetchData ERROR.stringify = ${JSON.stringify(error)}`);
+    logger.error(`app-side fetchData ERROR = ${error}`);
+    logger.error(`app-side fetchData ERROR.stringify = ${JSON.stringify(error)}`);
     res(null, {
       status: "error",
       error: `ERROR = ${error}`,
@@ -79,26 +129,56 @@ async function fetchLocation(res, url, site, body_request) {
   logger.log(`app-side fetchLocation() url = ${url}, site = ${site}`);
   try {
     let response;
-    if (site == "Sinoptik") {
-      logger.log(`app-side fetchLocation() body_request = ${body_request}`);
-      response = await fetch({
-        url: url,
-        method: "POST",
-        headers: {
-          "User-Agent": "Mozilla/5.0 (compatible; ZeppOS/1.0)",
-        },
-        body: body_request
-      });
+    let headers;
+    let method = "GET";
+    switch (site) {
+      case "AccuWeather":
+      case "AccuWeather_API":
+        headers = {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+          // "accept-encoding": "gzip, deflate, br, zstd",
+          "Accept-Language": "en-US,en;q=0.9,ru;q=0.8",
+          "Referer": "https://www.accuweather.com/",
+          "Connection": "keep-alive",
+          "Upgrade-Insecure-Requests": "1",
+          "sec-fetch-mode": "navigate",
+        };
+        break;
+      case "Sinoptik":
+        logger.log(`app-side fetchLocation() body_request = ${body_request}`);
+        method = "POST";
+        headers = {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+          "Accept-Language": "en-US,en;q=0.9,ru;q=0.8",
+          "Connection": "keep-alive",
+          "Upgrade-Insecure-Requests": "1",
+        };
+        break;
+      case "OpenMeteo":
+        headers = {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+          // "accept-encoding": "gzip, deflate, br, zstd",
+          "Accept-Language": "en-US,en;q=0.9,ru;q=0.8",
+          "Referer": "https://www.accuweather.com/",
+          "Connection": "keep-alive",
+          "Upgrade-Insecure-Requests": "1",
+          "sec-fetch-mode": "navigate",
+        };
+        break;
+    
+      default:
+        break;
     }
-    else {
-      response = await fetch({
-        url: url,
-        method: "GET",
-        headers: {
-          "User-Agent": "Mozilla/5.0 (compatible; ZeppOS/1.0)",
-        },
-      });
-    }
+    
+    response = await fetch({
+      url: url,
+      method: method,
+      headers: headers,
+      body: body_request,
+    });
     logger.log(`app-side response.status = ${response.status}`);
     // logger.log(`app-side response.body = ${response.body}`);
 
@@ -127,29 +207,42 @@ async function fetchLocation(res, url, site, body_request) {
     let data = {};
     if (site == "AccuWeather") {
       // body = https://www.accuweather.com/ru/gb/blackwall-tunnel/se10-0/weather-forecast/2520026
+      // logger.log(`app-side fetchLocation body = ${body}`);
       let startIndex = body.indexOf('https://www.accuweather.com/');
       let endIndex = body.indexOf('"', startIndex);
       let url = body.substring(startIndex, endIndex);
+      logger.log(`app-side fetchLocation url = ${url}`);
 
       startIndex = url.lastIndexOf("/");
       let city_id2 = url.substring(startIndex + 1);
       logger.log(`app-side fetchLocation city_id2 = ${city_id2}`);
       url = url.substring(0, startIndex);
       // url = https://www.accuweather.com/ru/gb/blackwall-tunnel/se10-0/weather-forecast
+
       startIndex = url.lastIndexOf("/");
       url = url.substring(0, startIndex);
       // url = https://www.accuweather.com/ru/gb/blackwall-tunnel/se10-0
+
       startIndex = url.lastIndexOf("/");
       let city_id1 = url.substring(startIndex + 1);
       logger.log(`app-side fetchLocation city_id1 = ${city_id1}`);
       url = url.substring(0, startIndex);
       // url = https://www.accuweather.com/ru/gb/blackwall-tunnel
+
       startIndex = url.lastIndexOf("/");
       let city_name = url.substring(startIndex + 1);
       logger.log(`app-side fetchLocation city_name = ${city_name}`);
+      url = url.substring(0, startIndex);
+      // url = https://www.accuweather.com/ru/gb
+
+      startIndex = url.lastIndexOf("/");
+      let location_id = url.substring(startIndex + 1);
+      logger.log(`app-side fetchLocation location_id = ${location_id}`);
+      // url = url.substring(0, startIndex);
 
       data = {
         city_name: city_name,
+        location_id: location_id,
         city_id1: city_id1,
         city_id2: city_id2,
       };
@@ -200,6 +293,23 @@ async function fetchLocation(res, url, site, body_request) {
       } catch (error) {
         throw new Error(
           `Sinoptik_API parse json error: ${error}`
+        );
+      }
+    }
+
+    if (site == "OpenMeteo") {
+      let responseJSON = body;
+      if (typeof body === 'string') responseJSON = JSON.parse(body);
+      // logger.log(`app-side fetchLocation responseJSON = ${JSON.stringify(responseJSON)}`);
+      data = {};
+      try {
+        if (responseJSON.address) {
+          data.city_name = responseJSON.address.city || responseJSON.address.town || responseJSON.address.village;
+          data.district = responseJSON.address.state || responseJSON.address.county;
+        }
+      } catch (error) {
+        throw new Error(
+          `OpenMeteo_API parse json error: ${error}`
         );
       }
     }
@@ -503,6 +613,367 @@ function iconFrom_AccuWeather(icon_index) {
   return {index: index, time_of_day: time_of_day}
 }
 
+function iconFrom_Sinoptik(condition) {
+  // logger.log(`app-side iconFrom_Sinoptik(${condition})`);
+  const str = String(condition).padStart(3, '0');
+
+  const cloud = str[0];
+  const intensity = str[1];
+  const type = str[2];
+
+  // --- ТУМАН ---
+  if (cloud === '6') {
+    return 13;
+  }
+
+  // --- БЕЗ ОСАДКОВ ---
+  if (intensity === '0') {
+    if (cloud === '0') return 1; // ясно
+    if (cloud === '1' || cloud === '2') return 2; // слабая облачность
+    if (cloud === '3') return 3; // облачно
+    if (cloud === '4' || cloud === '5') return 4; // пасмурно
+  }
+
+  // --- СМЕШАННЫЕ ОСАДКИ (421, 422) ---
+  if (type === '1' && (intensity === '2' || intensity === '3')) {
+    return 12; // дождь со снегом
+  }
+
+  // --- ОСОБЫЕ СЛУЧАИ ---
+  if (intensity === '4') {
+    if (type === '0') return 8;  // гроза
+    if (type === '2') return 11; // снегопад
+    if (type === '3') return 7;  // сильный град → ливень
+    return 12;
+  }
+
+  // --- ДОЖДЬ ---
+  if (type === '0') {
+    if (intensity === '1') return 5; // слабый дождь
+    if (intensity === '2') return 6; // дождь
+    if (intensity === '3') return 7; // ливень
+  }
+
+  // --- СНЕГ ---
+  if (type === '2') {
+    if (intensity === '1') return 9;  // слабый снег
+    if (intensity === '2') return 10; // снег
+    if (intensity === '3') return 11; // снегопад
+  }
+
+  // --- МОКРЫЙ СНЕГ ---
+  if (type === '1') {
+      return 12; // дождь со снегом
+  }
+
+  // --- ГРАД (type = 3) ---
+  if (type === '3') {
+    if (intensity === '1') return 5; // слабый град
+    if (intensity === '2') return 6; // град
+    if (intensity === '3') return 7; // сильный град
+  }
+
+  return 4;
+}
+
+function iconFrom_OpenMeteo(weatherCode) {
+
+    // --- ЯСНО ---
+    if (weatherCode === 0) {
+        return 1;
+    }
+
+    // --- ОБЛАЧНОСТЬ ---
+    if (weatherCode === 1 || weatherCode === 2) {
+        return 2; // слабая облачность
+    }
+
+    if (weatherCode === 3) {
+        return 4; // пасмурно
+    }
+
+    // --- ТУМАН ---
+    if (weatherCode === 45 || weatherCode === 48) {
+        return 13;
+    }
+
+    // --- МОРОСЬ ---
+    if (weatherCode === 51 || weatherCode === 56) {
+        return 5; // слабый дождь
+    }
+
+    if (weatherCode === 53 || weatherCode === 55 ||
+        weatherCode === 57) {
+        return 6; // дождь
+    }
+
+    // --- ДОЖДЬ ---
+    if (weatherCode === 61 || weatherCode === 66 ||
+        weatherCode === 80) {
+        return 5; // слабый дождь
+    }
+
+    if (weatherCode === 63 || weatherCode === 67 ||
+        weatherCode === 81) {
+        return 6; // дождь
+    }
+
+    if (weatherCode === 65 || weatherCode === 82) {
+        return 7; // ливень
+    }
+
+    // --- СНЕГ ---
+    if (weatherCode === 71 || weatherCode === 77 ||
+        weatherCode === 85) {
+        return 9; // слабый снег
+    }
+
+    if (weatherCode === 73) {
+        return 10; // снег
+    }
+
+    if (weatherCode === 75 || weatherCode === 86) {
+        return 11; // снегопад
+    }
+
+    // --- ГРОЗА ---
+    if (weatherCode === 95) {
+        return 8;
+    }
+
+    // --- ГРОЗА С ГРАДОМ ---
+    if (weatherCode === 96 || weatherCode === 99) {
+        return 8;
+    }
+
+    // fallback
+    return 0;
+}
+
+function getWeatherDescription_Sinoptik(condition) {
+  // logger.log(`app-side getWeatherDescription_Sinoptik(${condition})`);
+  const str = String(condition).padStart(3, '0');
+
+  const cloud = str[0];
+  const intensity = str[1];
+  const type = str[2];
+
+  // Облачность
+  const cloudMap = {
+    // '0': 'ясно',
+    // '1': 'малооблачно',
+    // '2': 'переменная облачность',
+    // '3': 'облачно',
+    // '4': 'пасмурно',
+    // '5': 'пасмурно',
+    // '6': 'туман'
+    '0': getText('cloudMap_clear'),
+    '1': getText('cloudMap_mostly_clear'),
+    '2': getText('cloudMap_partly_cloudy'),
+    '3': getText('cloudMap_cloudy'),
+    '4': getText('cloudMap_overcast'),
+    '5': getText('cloudMap_overcast'),
+    '6': getText('cloudMap_fog')
+  };
+
+  // Интенсивность
+  const intensityMap = {
+    // '0': '',
+    // '1': 'небольшой',
+    // '2': '',
+    // '3': 'сильный'
+    '0': '',
+    '1': getText('intensityMap_light'),
+    '2': '',
+    '3': getText('intensityMap_heavy')
+  };
+
+  // Тип осадков
+  const typeMap = {
+    // '0': 'дождь',
+    // '1': 'мокрый снег',
+    // '2': 'снег',
+    // '3': 'град'
+    '0': getText('typeMap_rain'),
+    '1': getText('typeMap_sleet'),
+    '2': getText('typeMap_snow'),
+    '3': getText('typeMap_hail')
+  };
+
+  let result = cloudMap[cloud] || '';
+
+  // Без осадков
+  if (intensity === '0') {
+    return result.charAt(0).toUpperCase() + result.slice(1);
+  }
+
+  // --- СМЕШАННЫЕ ОСАДКИ (421, 422) ---
+  if (type === '1') {
+    if (intensity === '2') {
+      result += ', ' + getText('special_sleet');
+      return result.charAt(0).toUpperCase() + result.slice(1);
+    }
+    if (intensity === '3') {
+      result += ', ' + getText('special_heavy_sleet');
+      return result.charAt(0).toUpperCase() + result.slice(1);
+    }
+  }
+
+  // --- ОСОБЫЕ СЛУЧАИ ---
+  if (intensity === '4') {
+    if (type === '0') {
+      result += ', ' + getText('special_thunderstorm');
+    } else if (type === '2') {
+      result += ', ' + getText('special_snowfall');
+    } else if (type === '3') {
+      result += ', ' + getText('special_hail');
+    } else {
+      result += ', ' + getText('special_heavy_rainfall');
+    }
+    return result.charAt(0).toUpperCase() + result.slice(1);
+  }
+
+  const intensityText = intensityMap[intensity];
+  const typeText = typeMap[type] || getText('precipitation');
+
+  if (intensityText) {
+    result += ', ' + intensityText + ' ' + typeText;
+  } else {
+    result += ', ' + typeText;
+  }
+
+  return result.charAt(0).toUpperCase() + result.slice(1);
+}
+
+function getWeatherDescription_OpenMeteo(weatherCode) {
+
+    // --- ЯСНО ---
+    if (weatherCode === 0) {
+        return getText('openmeteo_clear');
+    }
+
+    // --- ОБЛАЧНОСТЬ ---
+    if (weatherCode === 1) {
+        return getText('openmeteo_mainly_clear');
+    }
+
+    if (weatherCode === 2) {
+        return getText('openmeteo_partly_cloudy');
+    }
+
+    if (weatherCode === 3) {
+        return getText('openmeteo_overcast');
+    }
+
+    // --- ТУМАН ---
+    if (weatherCode === 45) {
+        return getText('openmeteo_fog');
+    }
+
+    if (weatherCode === 48) {
+        return getText('openmeteo_depositing_rime_fog');
+    }
+
+    // --- МОРОСЬ ---
+    if (weatherCode === 51) {
+        return getText('openmeteo_light_drizzle');
+    }
+
+    if (weatherCode === 53) {
+        return getText('openmeteo_moderate_drizzle');
+    }
+
+    if (weatherCode === 55) {
+        return getText('openmeteo_intensity_drizzle');
+    }
+
+    // --- ПЕРЕОХЛАЖДЕННАЯ МОРОСЬ ---
+    if (weatherCode === 56) {
+        return getText('openmeteo_light_freezing_drizzle');
+    }
+
+    if (weatherCode === 57) {
+        return getText('openmeteo_intensity_freezing_drizzle');
+    }
+
+    // --- ДОЖДЬ ---
+    if (weatherCode === 61) {
+        return getText('openmeteo_light_rain');
+    }
+
+    if (weatherCode === 63) {
+        return getText('openmeteo_moderate_rain');
+    }
+
+    if (weatherCode === 65) {
+        return getText('openmeteo_intensity_rain');
+    }
+
+    // --- ЛЕДЯНОЙ ДОЖДЬ ---
+    if (weatherCode === 66) {
+        return getText('openmeteo_light_freezing_rain');
+    }
+
+    if (weatherCode === 67) {
+        return getText('openmeteo_intensity_freezing_rain');
+    }
+
+    // --- СНЕГ ---
+    if (weatherCode === 71) {
+        return getText('openmeteo_light_snow');
+    }
+
+    if (weatherCode === 73) {
+        return getText('openmeteo_moderate_snow');
+    }
+
+    if (weatherCode === 75) {
+        return getText('openmeteo_intensity_snow');
+    }
+
+    if (weatherCode === 77) {
+        return getText('openmeteo_snow_grains');
+    }
+
+    // --- ЛИВНЕВЫЙ ДОЖДЬ ---
+    if (weatherCode === 80) {
+        return getText('openmeteo_light_rain_showers');
+    }
+
+    if (weatherCode === 81) {
+        return getText('openmeteo_moderate_rain_showers');
+    }
+
+    if (weatherCode === 82) {
+        return getText('openmeteo_intensity_rain_showers');
+    }
+
+    // --- СНЕГОВЫЕ ЗАРЯДЫ ---
+    if (weatherCode === 85) {
+        return getText('openmeteo_light_snow_showers');
+    }
+
+    if (weatherCode === 86) {
+        return getText('openmeteo_intensity_snow_showers');
+    }
+
+    // --- ГРОЗА ---
+    if (weatherCode === 95) {
+        return getText('openmeteo_thunderstorm');
+    }
+
+    // --- ГРОЗА С ГРАДОМ ---
+    if (weatherCode === 96) {
+        return getText('openmeteo_thunderstorm_with_hail');
+    }
+
+    if (weatherCode === 99) {
+        return getText('openmeteo_thunderstorm_with_heavy_hail');
+    }
+
+    // fallback
+    return getText('openmeteo_unknown');
+}
 
 function windStrToAndle(str) {
   direction = 0;
@@ -609,9 +1080,48 @@ function windStrToAndle(str) {
   return direction;
 }
 
+function windAndleToStr(angle) {
+  let str = "";
+  if (angle >= 348.75 || angle < 11.25) {
+    str = "N";
+  } else if (angle >= 11.25 && angle < 33.75) {
+    str = "NNE";
+  } else if (angle >= 33.75 && angle < 56.25) {
+    str = "NE";
+  } else if (angle >= 56.25 && angle < 78.75) {
+    str = "ENE";
+  } else if (angle >= 78.75 && angle < 101.25) {
+    str = "E";
+  } else if (angle >= 101.25 && angle < 123.75) {
+    str = "ESE";
+  } else if (angle >= 123.75 && angle < 146.25) {
+    str = "SE";
+  } else if (angle >= 146.25 && angle < 168.75) {
+    str = "SSE";
+  } else if (angle >= 168.75 && angle < 191.25) {
+    str = "S";
+  } else if (angle >= 191.25 && angle < 213.75) {
+    str = "SSW";
+  } else if (angle >= 213.75 && angle < 236.25) {
+    str = "SW";
+  } else if (angle >= 236.25 && angle < 258.75) {
+    str = "WSW";
+  } else if (angle >= 258.75 && angle < 281.25) {
+    str = "W";
+  } else if (angle >= 281.25 && angle < 303.75) {
+    str = "WNW";
+  } else if (angle >= 303.75 && angle < 326.25) {
+    str = "NW";
+  } else if (angle >= 326.25 && angle < 348.75) {
+    str = "NNW";
+  }
+  return str;
+}
+
 function fahrenheitToCelsius(fahrenheit) {
   return Number(parseFloat((fahrenheit - 32) * 5 / 9).toFixed(2));
 }
+
 function milesToKilometers(miles) {
   return Number(parseFloat(miles * 1.60934).toFixed(2));
 }
@@ -901,8 +1411,10 @@ function parseWeather_AccuWeather(htmlStr) {
       data.weatherDescriptionExtended = str_weather_info_class.match( /<div class="phrase">(.*?)<\/div>/s)[1]; // описание погоды
       // logger.log(`app-side weatherDescriptionExtended = ${data.weatherDescriptionExtended}`);
       // Иконка
+      // logger.log(`app-side str_current = ${str_current}`);
       // let weather_icon = parseInt(str_current.match( /data-src="[\D]*(\d+).svg"/)[1]);
-      let weather_icon = parseInt(str_current.match( /data-src="[^"]*\/(\d+)\.svg"/)[1]);
+      // let weather_icon = parseInt(str_current.match( /data-src="[^"]*\/(\d+)\.svg"/)[1]);
+      let weather_icon = parseInt(str_current.match( /class="icon" src="[^"]*\/(\d+)\.svg"/)[1]);
       let value = iconFrom_AccuWeather(weather_icon);
       // logger.log(`app-side weather_icon value = ${JSON.stringify(value)}, weather_icon = ${weather_icon}`);
       data.weatherIcon = value.index;
@@ -1332,10 +1844,11 @@ function parseForecast_AccuWeather(htmlStr) {
     // logger.log(`app-side htmlStr = ${htmlStr}`);
     
     let count = 0;
-    startIndex = htmlStr.indexOf('<div class="daily-wrapper"');
+    startIndex = htmlStr.indexOf('<div class="daily-wrapper');
     while (startIndex >= 0 && count < 15) {
+      // logger.log(`app-side while **********************`);
       let forecast_json = {};
-      endIndex = htmlStr.indexOf('<div class="daily-wrapper"', startIndex + '<div class="daily-wrapper"'.length);
+      endIndex = htmlStr.indexOf('<div class="daily-wrapper', startIndex + '<div class="daily-wrapper'.length);
       if (endIndex < startIndex) endIndex = htmlStr.length;
       let dayStr = htmlStr.substring(startIndex, endIndex);
       htmlStr = htmlStr.slice(endIndex);
@@ -1385,8 +1898,10 @@ function parseForecast_AccuWeather(htmlStr) {
       //#endregion
 
       //#region иконка погоды
-      let weather_icon = parseInt(dayStr.match( /data-src="[^"]*\/(\d+)\.svg"/s)[1]);
+      // let weather_icon = parseInt(dayStr.match( /data-src="[^"]*\/(\d+)\.svg"/s)[1]);
       // let weather_icon = parseInt(dayStr.match( /data-src="[\D]*(\d+).svg"/s)[1]);
+      // logger.log(`app-side str_current for weather_icon = ${dayStr}`);
+      let weather_icon = parseInt(dayStr.match( /class="icon" src="[^"]*\/(\d+)\.svg"/)[1]);
       let value = iconFrom_AccuWeather(weather_icon);
       forecast_json.weatherIcon = value.index;
       forecast_json.weatherIconPeriod = value.time_of_day;
@@ -1405,8 +1920,8 @@ function parseForecast_AccuWeather(htmlStr) {
       //#endregion
 
       startIndex = dayStr.indexOf('<div class="half-day-card-content');
-      endIndex = dayStr.indexOf('<div class="daily-wrapper"', startIndex + '<div class="daily-wrapper"'.length);
-      if (endIndex < startIndex) endIndex = htmlStr.length;
+      endIndex = dayStr.indexOf('<div class="daily-wrapper', startIndex + '<div class="daily-wrapper'.length);
+      if (endIndex < startIndex) endIndex = dayStr.length;
       dayStr = dayStr.substring(startIndex, endIndex);
       // logger.log(`app-side dayStr = ${dayStr}`);
 
@@ -1487,14 +2002,14 @@ function parseForecast_AccuWeather(htmlStr) {
           if (pressureTrend_values == "↓") pressureTrend = -1;
           if (pressureTrend_values == "↑") pressureTrend = 1;
           if (pressureTrend_values == "↔") pressureTrend = 0;
-          // logger.log(`app-side pressure = ${pressure_values}`);
+          logger.log(`app-side pressure = ${pressure_values}`);
           // logger.log(`app-side pressureTrend = ${pressureTrend}`);
           forecast_json.pressure = pressure_values;
           forecast_json.pressureTrend = pressureTrend;
         }
       });
       
-      startIndex = htmlStr.indexOf('<div class="daily-wrapper"');
+      startIndex = htmlStr.indexOf('<div class="daily-wrapper');
       forecast.push(forecast_json);
       // logger.log(`app-side forecast_json = ${JSON.stringify(forecast_json)}`);
       count++;
@@ -1513,7 +2028,7 @@ function parseForecast_AccuWeather(htmlStr) {
     return null;
   }
 
-  logger.log(`app-side parseForecast_AccuWeather(return ${JSON.stringify(data)})`);
+  // logger.log(`app-side parseForecast_AccuWeather(return ${JSON.stringify(data)})`);
   return data;
   
 }
@@ -1762,6 +2277,466 @@ function parseForecast_AccuWeather_API(forecastJSON, globalData) {
   return data;
 }
 
+function parseWeather_Sinoptik(weatherJSON) {
+  logger.log(`app-side parseWeather_Sinoptik()`);
+  if (typeof weatherJSON == 'string') weatherJSON = JSON.parse(weatherJSON);
+  if (weatherJSON == undefined || weatherJSON == null || Object.keys(weatherJSON).length == 0) return undefined;
+  let data = {};
+  let weatherValues = {};
+  let forecastValues = {};
+  let timreZone = 0;
+
+  if (weatherJSON.location?.title !== undefined) weatherValues.city = weatherJSON.location.title;
+  if (weatherJSON.superior?.district?.title !== undefined) weatherValues.district = weatherJSON.superior.district.title;
+  if (weatherJSON.superior?.region?.title !== undefined) weatherValues.district = weatherJSON.superior.region.title;
+
+  // текущий день - это первый день в прогнозе
+  const firstKey = Object.keys(weatherJSON.forecast).sort()[0]; // имя
+  const firstDay = weatherJSON.forecast[firstKey]; // данные по первому дню
+  if (firstDay.now !== undefined) {
+    if (firstDay.now.current_utc_tz_offset !== undefined) {
+      weatherValues.timeZone = firstDay.now.current_utc_tz_offset / 60; // в минутах
+      timreZone = weatherValues.timeZone;
+    }
+  }
+
+  // прогноз
+  const forecast = weatherJSON.forecast;
+
+  // текущая дата в формате YYYY-MM-DD
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+
+  // текущий час
+  const currentHour = now.getHours();
+
+  for (const [date, day] of Object.entries(forecast)) {
+    logger.log(`app-side date = ${date}`);
+    if (date === today) {
+      const targetHourNaw = new Date().getHours();
+      const hourDataNaw = day.hours?.reduce((closest, h) => {
+        if (!closest) return h;
+        return Math.abs(h.hour - targetHourNaw) < Math.abs(closest.hour - targetHourNaw)
+          ? h
+          : closest;
+      }, null);
+
+      // текущий день
+      if (hourDataNaw) {
+        if (hourDataNaw.temp !== undefined) weatherValues.temperature = hourDataNaw.temp;
+        if (hourDataNaw.temp_feels !== undefined) weatherValues.temperatureFeels = hourDataNaw.temp_feels;
+        if (hourDataNaw.condition !== undefined) {
+          weatherValues.weatherDescriptionExtended = getWeatherDescription_Sinoptik(hourDataNaw.condition);
+          weatherValues.weatherIcon = iconFrom_Sinoptik(hourDataNaw.condition);
+        }
+        if (hourDataNaw.pressure !== undefined) weatherValues.pressure = Math.round(hourDataNaw.pressure/100); // перевод в hPa
+        if (hourDataNaw.humidity !== undefined) weatherValues.humidity = hourDataNaw.humidity;
+        if (hourDataNaw.cloudiness !== undefined) weatherValues.cloudiness = hourDataNaw.cloudiness;
+        if (hourDataNaw.precip !== undefined) weatherValues.chanceOfRain = hourDataNaw.precip;
+        if (hourDataNaw.precip_amount !== undefined) weatherValues.rainfall = hourDataNaw.precip_amount;
+        if (hourDataNaw.wind !== undefined) {
+          if (hourDataNaw.wind.dir !== undefined) {
+            let windDir = windStrToAndle(hourDataNaw.wind.dir);
+            weatherValues.windDirection = windDir;
+            weatherValues.windTitle = windDir;
+          }
+          if (hourDataNaw.wind.speed !== undefined) weatherValues.windSpeed = hourDataNaw.wind.speed;
+        }
+        if (day.temp !== undefined) {
+          if (day.temp.max !== undefined) weatherValues.temperatureMax = day.temp.max;
+          if (day.temp.min !== undefined) weatherValues.temperatureMin = day.temp.min;
+        }
+
+        if (day.sun !== undefined) {
+          if (day.sun.is_polar_day !== undefined) weatherValues.weatherIconPeriod = "day";
+          if (day.sun.is_polar_night !== undefined) weatherValues.weatherIconPeriod = "night";
+
+          
+          if (day.sun.rises_at !== undefined) {
+            let timeStr = day.sun.rises_at;
+            const [hours, minutes] = timeStr.split(":").map(Number);
+
+            let sun_rise = new Date();
+            sun_rise.setUTCHours(hours);
+            sun_rise.setUTCMinutes(minutes - timreZone);
+            weatherValues.sunriseTime = sun_rise.getTime();
+          }
+          if (day.sun.sets_at !== undefined) {
+            let timeStr = day.sun.sets_at;
+            const [hours, minutes] = timeStr.split(":").map(Number);
+          
+            let sun_set = new Date();
+            sun_set.setUTCHours(hours);
+            sun_set.setUTCMinutes(minutes - timreZone);
+            weatherValues.sunsetTime = sun_set.getTime();
+          }
+        }
+
+      }
+    }
+
+    const targetHour = (date === today)
+      ? new Date().getHours()
+      : 12;
+
+    // прогноз по дням - поиск данных по часу, ближайшему к targetHour
+    const hourData = day.hours?.reduce((closest, h) => {
+      if (!closest) return h;
+      return Math.abs(h.hour - targetHour) < Math.abs(closest.hour - targetHour)
+        ? h
+        : closest;
+    }, null);
+
+    if (!hourData) continue;
+    let forecastDay = {};
+    if (hourData.temp !== undefined) forecastDay.temperature = hourData.temp;
+    if (hourData.temp_feels !== undefined) forecastDay.temperatureFeels = hourData.temp_feels;
+    if (hourData.condition !== undefined) {
+      forecastDay.weatherDescriptionExtended = getWeatherDescription_Sinoptik(hourData.condition);
+      forecastDay.weatherIcon = iconFrom_Sinoptik(hourData.condition);
+    }
+    if (hourData.pressure !== undefined) forecastDay.pressure = Math.round(hourData.pressure/100); // перевод в hPa
+    if (hourData.humidity !== undefined) forecastDay.humidity = hourData.humidity;
+    if (hourData.cloudiness !== undefined) forecastDay.cloudiness = hourData.cloudiness;
+    if (hourData.precip !== undefined) forecastDay.chanceOfRain = hourData.precip;
+    if (hourData.precip_amount !== undefined) forecastDay.rainfall = hourData.precip_amount;
+    if (hourData.wind !== undefined) {
+      if (hourData.wind.dir !== undefined) {
+        let windDir = windStrToAndle(hourData.wind.dir);
+        forecastDay.windDirection = windDir;
+        forecastDay.windTitle = hourData.wind.dir;
+      }
+      if (hourData.wind.speed !== undefined) forecastDay.windSpeed = hourData.wind.speed;
+    }
+
+    if (day.temp !== undefined) {
+      if (day.temp.max !== undefined) forecastDay.temperatureMax = day.temp.max;
+      if (day.temp.min !== undefined) forecastDay.temperatureMin = day.temp.min;
+    }
+
+    if (day.sun !== undefined) {
+      if (day.sun.is_polar_day !== undefined) forecastDay.weatherIconPeriod = "day";
+      if (day.sun.is_polar_night !== undefined) forecastDay.weatherIconPeriod = "night";
+
+      
+      if (day.sun.rises_at !== undefined) {
+        let timeStr = day.sun.rises_at;
+        const [hours, minutes] = timeStr.split(":").map(Number);
+
+        let sun_rise = new Date();
+        sun_rise.setUTCHours(hours);
+        sun_rise.setUTCMinutes(minutes - weatherValues.timeZone);
+        forecastDay.sunriseTime = sun_rise.getTime();
+      }
+      if (day.sun.sets_at !== undefined) {
+        let timeStr = day.sun.sets_at;
+        const [hours, minutes] = timeStr.split(":").map(Number);
+      
+        let sun_set = new Date();
+        sun_set.setUTCHours(hours);
+        sun_set.setUTCMinutes(minutes - weatherValues.timeZone);
+        forecastDay.sunsetTime = sun_set.getTime();
+      }
+    }
+
+
+    const dateNaw = parseDate(date);
+    dateNaw.setHours(12);
+    dateNaw.setMinutes(0);
+    forecastDay.weatherTime = dateNaw.getTime();
+    forecastDay.weatherTimeStr = dateNaw;
+    
+    if (forecastDay){
+      if (!forecastValues.forecast) forecastValues.forecast = [];
+      forecastValues.forecast.push(forecastDay);
+    }
+    // logger.log(`app-side date = ${date}, targetHour = ${targetHour}, hourData.hour = ${hourData.hour}`);
+  }
+
+  if (firstDay.now !== undefined) {
+    if (firstDay.now.temp !== undefined) weatherValues.temperature = firstDay.now.temp;
+    if (firstDay.now.temp_feels !== undefined) weatherValues.temperatureFeels = firstDay.now.temp_feels;
+    if (firstDay.now.condition !== undefined) {
+      weatherValues.weatherDescriptionExtended = getWeatherDescription_Sinoptik(firstDay.now.condition);
+      weatherValues.weatherIcon = iconFrom_Sinoptik(firstDay.now.condition);
+    }
+  }
+
+  // const dateNaw = new Date();
+  // dateNaw.setHours(12);
+  // dateNaw.setMinutes(0);
+  weatherValues.weatherTime = now.getTime();
+  weatherValues.weatherTimeStr = now;
+
+  if (forecastValues.forecast && forecastValues.forecast.length > 0) {
+    forecastValues.weatherTime = now.getTime();
+    forecastValues.weatherTimeStr = now;
+  }
+  if (weatherValues.timeZone) forecastValues.timeZone = weatherValues.timeZone;
+  if (weatherValues.city) forecastValues.city = weatherValues.city;
+
+  data = {weather: weatherValues, forecast: forecastValues};
+  // logger.log(`app-side parseWeather_Sinoptik() return ${JSON.stringify(data.weather)}`);
+  return data;
+}
+
+function parseWeather_OpenMeteo(weatherJSON, globalData) {
+  logger.log(`app-side parseWeather_OpenMeteo()`);
+  // logger.log(`app-side typeof weatherJSON = ${typeof weatherJSON}`);
+  if (typeof weatherJSON == 'string') weatherJSON = JSON.parse(weatherJSON);
+  if (weatherJSON == undefined || weatherJSON == null || Object.keys(weatherJSON).length == 0) return undefined;
+  let data = {};
+  let timreZone = 0;
+
+   // текущая дата в формате YYYY-MM-DD
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+
+  if (weatherJSON.utc_offset_seconds) {
+    data.timeZone = weatherJSON.utc_offset_seconds / 60; // в минутах
+    timreZone = data.timeZone;
+  }
+
+  //#region текущий день
+  if (weatherJSON.current) {
+    // logger.log(`app-side weatherJSON.current = ${JSON.stringify(weatherJSON.current)}`);
+    if (weatherJSON.current.temperature_2m !== undefined) data.temperature = weatherJSON.current.temperature_2m;
+    if (weatherJSON.current.apparent_temperature !== undefined) data.temperatureFeels = weatherJSON.current.apparent_temperature;
+
+    if (weatherJSON.current.weather_code !== undefined) {
+      data.weatherDescriptionExtended = getWeatherDescription_OpenMeteo(weatherJSON.current.weather_code);
+      data.weatherIcon = iconFrom_OpenMeteo(weatherJSON.current.weather_code);
+    }
+
+    if (weatherJSON.current.uv_index !== undefined) data.uvi = weatherJSON.current.uv_index;
+    if (weatherJSON.current.cloud_cover !== undefined) data.cloudiness = weatherJSON.current.cloud_cover;
+    if (weatherJSON.current.visibility !== undefined) data.visibility = weatherJSON.current.visibility;
+    if (weatherJSON.current.relative_humidity_2m !== undefined) data.humidity = weatherJSON.current.relative_humidity_2m;
+
+    if (weatherJSON.current.precipitation_probability !== undefined) data.chanceOfRain = weatherJSON.current.precipitation_probability;
+    if (weatherJSON.current.precipitation !== undefined) data.rainfall = weatherJSON.current.precipitation;
+
+    if (weatherJSON.current.surface_pressure !== undefined) data.pressure = Math.round(weatherJSON.current.surface_pressure);
+
+    if (weatherJSON.current.wind_speed_10m !== undefined) data.windSpeed = weatherJSON.current.wind_speed_10m;
+    if (weatherJSON.current.wind_gusts_10m !== undefined) data.windGust = weatherJSON.current.wind_gusts_10m;
+    if (weatherJSON.current.wind_direction_10m !== undefined) {
+      data.windDirection = weatherJSON.current.wind_direction_10m;
+      data.windTitle = windAndleToStr(weatherJSON.current.wind_direction_10m);
+    }
+  }
+  //#endregion
+
+   //#region прогноз
+  if (weatherJSON.daily && weatherJSON.daily.time && weatherJSON.daily.time.length > 0) {
+    // logger.log(`app-side weatherJSON.daily = ${JSON.stringify(weatherJSON.daily)}`);
+    let forecast = [];
+    for (let i = 0; i < weatherJSON.daily.time.length; i++) {
+      // добавляем максимальную/минимальную температуру и восход/закат в текущий день
+      if (weatherJSON.daily.time[i] === today) {
+        if (weatherJSON.daily.temperature_2m_max && weatherJSON.daily.temperature_2m_max[i] !== undefined) {
+              data.temperatureMax = weatherJSON.daily.temperature_2m_max[i];
+        }
+        if (weatherJSON.daily.temperature_2m_min && weatherJSON.daily.temperature_2m_min[i] !== undefined) {
+          data.temperatureMin = weatherJSON.daily.temperature_2m_min[i];
+        }
+
+        if (weatherJSON.daily.sunrise && weatherJSON.daily.sunrise[i] !== undefined) {
+          let sun_rise_time = parseTime(weatherJSON.daily.sunrise[i]);
+          let sun_rise = new Date();
+          sun_rise.setUTCHours(sun_rise_time.hours);
+          sun_rise.setUTCMinutes(sun_rise_time.minutes - timreZone);
+          data.sunriseTime = sun_rise.getTime();
+        }
+        if (weatherJSON.daily.sunset && weatherJSON.daily.sunset[i] !== undefined) {
+          let sun_set_time = parseTime(weatherJSON.daily.sunset[i]);
+          let sun_set = new Date();
+          sun_set.setUTCHours(sun_set_time.hours);
+          sun_set.setUTCMinutes(sun_set_time.minutes - timreZone);
+          data.sunsetTime = sun_set.getTime();
+        }
+      }
+    } // for
+  }
+  //#endregion
+
+  data.weatherTime = now.getTime();
+  data.weatherTimeStr = now;
+  if (globalData) {
+    if (globalData.city_name) data.city = globalData.city_name;
+    if (globalData.district) data.district = globalData.district;
+  }
+
+  // logger.log(`app-side parseWeather_OpenMeteo() return ${JSON.stringify(data)}`);
+  return data;
+}
+
+function parseForecast_OpenMeteo(weatherJSON, globalData) {
+  logger.log(`app-side parseForecast_OpenMeteo()`);
+  // logger.log(`app-side typeof weatherJSON = ${typeof weatherJSON}`);
+  if (typeof weatherJSON == 'string') weatherJSON = JSON.parse(weatherJSON);
+  if (weatherJSON == undefined || weatherJSON == null || Object.keys(weatherJSON).length == 0) return undefined;
+  let data = {};
+  let timreZone = 0;
+
+   // текущая дата в формате YYYY-MM-DD
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+
+  if (weatherJSON.utc_offset_seconds) {
+    data.timeZone = weatherJSON.utc_offset_seconds / 60; // в минутах
+    timreZone = data.timeZone;
+  }
+
+  //#region прогноз
+  if (weatherJSON.hourly && weatherJSON.hourly.time && weatherJSON.hourly.time.length > 0) {
+    // logger.log(`app-side weatherJSON.hourly = ${JSON.stringify(weatherJSON.hourly)}`);
+     let forecast = [];
+     for (let i = 0; i < weatherJSON.hourly.time.length; i++) {
+      // let dateStr = weatherJSON.hourly.time[i].split('T')[0];
+      let hour = parseTime(weatherJSON.hourly.time[i]).hours;
+      if (hour >= 11 && hour < 13) {
+        let forecastHour = {};
+        if (weatherJSON.hourly.weather_code && weatherJSON.hourly.weather_code[i] !== undefined) {
+          forecastHour.weatherDescriptionExtended = getWeatherDescription_OpenMeteo(weatherJSON.hourly.weather_code[i]);
+          forecastHour.weatherIcon = iconFrom_OpenMeteo(weatherJSON.hourly.weather_code[i]);
+        }
+
+        if (weatherJSON.hourly.temperature_2m && weatherJSON.hourly.temperature_2m[i] !== undefined) forecastHour.temperature = weatherJSON.hourly.temperature_2m[i];
+        if (weatherJSON.hourly.apparent_temperature && weatherJSON.hourly.apparent_temperature[i] !== undefined) forecastHour.temperatureFeels = weatherJSON.hourly.apparent_temperature[i];
+        
+        if (weatherJSON.hourly.uv_index && weatherJSON.hourly.uv_index[i] !== undefined) forecastHour.uvi = Math.round(weatherJSON.hourly.uv_index[i]);
+        if (weatherJSON.hourly.cloud_cover && weatherJSON.hourly.cloud_cover[i] !== undefined) forecastHour.cloudiness = weatherJSON.hourly.cloud_cover[i];
+        if (weatherJSON.hourly.visibility && weatherJSON.hourly.visibility[i] !== undefined) forecastHour.visibility = weatherJSON.hourly.visibility[i];
+        if (weatherJSON.hourly.relative_humidity_2m && weatherJSON.hourly.relative_humidity_2m[i] !== undefined) forecastHour.humidity = weatherJSON.hourly.relative_humidity_2m[i];
+        // if (weatherJSON.hourly.precipitation_probability && weatherJSON.hourly.precipitation_probability[i] !== undefined) forecastHour.chanceOfRain = weatherJSON.hourly.precipitation_probability[i];
+        // if (weatherJSON.hourly.precipitation && weatherJSON.hourly.precipitation[i] !== undefined) forecastHour.rainfall = weatherJSON.hourly.precipitation[i];
+        if (weatherJSON.hourly.surface_pressure && weatherJSON.hourly.surface_pressure[i] !== undefined) forecastHour.pressure = Math.round(weatherJSON.hourly.surface_pressure[i]);
+        // if (weatherJSON.hourly.wind_speed_10m && weatherJSON.hourly.wind_speed_10m[i] !== undefined) forecastHour.windSpeed = weatherJSON.hourly.wind_speed_10m[i];
+        // if (weatherJSON.hourly.wind_gusts_10m && weatherJSON.hourly.wind_gusts_10m[i] !== undefined) forecastHour.windGust = weatherJSON.hourly.wind_gusts_10m[i];
+        // if (weatherJSON.hourly.wind_direction_10m && weatherJSON.hourly.wind_direction_10m[i] !== undefined) {
+        //   forecastHour.windDirection = weatherJSON.hourly.wind_direction_10m[i];
+        //   forecastHour.windTitle = windAndleToStr(weatherJSON.hourly.wind_direction_10m[i]);
+        // }
+
+        if (weatherJSON.hourly.time && weatherJSON.hourly.time[i] !== undefined) {
+          const dateNaw = parseDate(weatherJSON.hourly.time[i]);
+          const timeNaw = parseTime(weatherJSON.hourly.time[i]);
+          dateNaw.setHours(timeNaw.hours);
+          dateNaw.setMinutes(timeNaw.minutes);
+          forecastHour.weatherTime = dateNaw.getTime();
+          forecastHour.weatherTimeStr = dateNaw;
+        }
+
+        // logger.log(`app-side forecastHour = ${JSON.stringify(forecastHour)}`);
+        forecast.push(forecastHour);
+      }
+     }
+     data.forecast = forecast;
+  }
+
+  if (weatherJSON.daily && weatherJSON.daily.time && weatherJSON.daily.time.length > 0 && data.forecast && data.forecast.length > 0) {
+    // logger.log(`app-side weatherJSON.daily = ${JSON.stringify(weatherJSON.daily)}`);
+    // let forecast = [];
+    for (let i = 0; i < weatherJSON.daily.time.length; i++) {
+
+      // let forecastDay = {};
+      let forecastHour = undefined;
+
+      for (let index = 0; index < data.forecast.length; index++) {
+        let element = data.forecast[index];
+        let elementDateStr = new Date(element.weatherTime).toISOString().slice(0, 10);
+        // logger.log(`app-side elementDateStr = ${elementDateStr}, weatherJSON.daily.time[i] = ${weatherJSON.daily.time[i]}`);
+        if (elementDateStr === weatherJSON.daily.time[i]) {
+          forecastHour = element;
+          break;
+        }
+      }
+      if (forecastHour === undefined) continue;
+           
+      // if (weatherJSON.daily.weather_code && weatherJSON.daily.weather_code[i] !== undefined) {
+      //   forecastHour.weatherDescriptionExtended = getWeatherDescription_OpenMeteo(weatherJSON.daily.weather_code[i]);
+      //   forecastHour.weatherIcon = iconFrom_OpenMeteo(weatherJSON.daily.weather_code[i]);
+      // }
+
+      if (weatherJSON.daily.temperature_2m_max && weatherJSON.daily.temperature_2m_max[i] !== undefined) forecastHour.temperatureMax = weatherJSON.daily.temperature_2m_max[i];
+      if (weatherJSON.daily.temperature_2m_min && weatherJSON.daily.temperature_2m_min[i] !== undefined) forecastHour.temperatureMin = weatherJSON.daily.temperature_2m_min[i];
+      // if (weatherJSON.daily.temperature_2m_max && weatherJSON.daily.temperature_2m_max[i] !== undefined) forecastHour.temperature = weatherJSON.daily.temperature_2m_max[i];
+      // if (weatherJSON.daily.apparent_temperature_max && weatherJSON.daily.apparent_temperature_max[i] !== undefined) forecastHour.temperatureFeels = weatherJSON.daily.apparent_temperature_max[i];
+     
+      if (weatherJSON.daily.uv_index_max && weatherJSON.daily.uv_index_max[i] !== undefined) forecastHour.uvi = weatherJSON.daily.uv_index_max[i];
+      // if (weatherJSON.daily.cloud_cover_max && weatherJSON.daily.cloud_cover_max[i] !== undefined) forecastHour.cloudiness = weatherJSON.daily.cloud_cover_max[i];
+      
+      if (weatherJSON.daily.precipitation_probability_max && weatherJSON.daily.precipitation_probability_max[i] !== undefined) forecastHour.chanceOfRain = weatherJSON.daily.precipitation_probability_max[i];
+      if (weatherJSON.daily.precipitation_sum && weatherJSON.daily.precipitation_sum[i] !== undefined) forecastHour.rainfall = weatherJSON.daily.precipitation_sum[i];
+
+      if (weatherJSON.daily.wind_speed_10m_max && weatherJSON.daily.wind_speed_10m_max[i] !== undefined) forecastHour.windSpeed = weatherJSON.daily.wind_speed_10m_max[i];
+      if (weatherJSON.daily.wind_gusts_10m_max && weatherJSON.daily.wind_gusts_10m_max[i] !== undefined) forecastHour.windGust = weatherJSON.daily.wind_gusts_10m_max[i];
+      if (weatherJSON.daily.wind_direction_10m_dominant && weatherJSON.daily.wind_direction_10m_dominant[i] !== undefined) {
+        forecastHour.windDirection = weatherJSON.daily.wind_direction_10m_dominant[i];
+        forecastHour.windTitle = windAndleToStr(weatherJSON.daily.wind_direction_10m_dominant[i]);
+      }
+
+      if (weatherJSON.daily.sunrise && weatherJSON.daily.sunrise[i] !== undefined) {
+        let sun_rise_time = parseTime(weatherJSON.daily.sunrise[i]);
+        let sun_rise = new Date();
+        sun_rise.setUTCHours(sun_rise_time.hours);
+        sun_rise.setUTCMinutes(sun_rise_time.minutes - timreZone);
+        forecastHour.sunriseTime = sun_rise.getTime();
+      }
+      if (weatherJSON.daily.sunset && weatherJSON.daily.sunset[i] !== undefined) {
+        let sun_set_time = parseTime(weatherJSON.daily.sunset[i]);
+        let sun_set = new Date();
+        sun_set.setUTCHours(sun_set_time.hours);
+        sun_set.setUTCMinutes(sun_set_time.minutes - timreZone);
+        forecastHour.sunsetTime = sun_set.getTime();
+      }
+
+      // if (weatherJSON.daily.time && weatherJSON.daily.time[i] !== undefined) {
+      //   const dateNaw = parseDate(weatherJSON.daily.time[i]);
+      //   dateNaw.setHours(12);
+      //   dateNaw.setMinutes(0);
+      //   forecastHour.weatherTime = dateNaw.getTime();
+      //   forecastHour.weatherTimeStr = dateNaw;
+      // }
+
+      // logger.log(`app-side forecastDay = ${JSON.stringify(forecastDay)}`);
+      // forecast.push(forecastDay);
+    }
+    // data.forecast = forecast;
+  }
+  //#endregion
+
+  data.weatherTime = now.getTime();
+  data.weatherTimeStr = now;
+  if (globalData) {
+    if (globalData.city_name) data.city = globalData.city_name;
+    if (globalData.district) data.district = globalData.district;
+  }
+
+  // logger.log(`app-side parseForecast_OpenMeteo() return ${JSON.stringify(data)}`);
+  return data;
+}
+
+function parseDate(str) {
+  const datePart = str.split('T')[0];
+  const [year, month, day] = datePart.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function parseTime(dateTimeStr) {
+    const time = dateTimeStr.split("T")[1];
+
+    if (!time) return null;
+
+    const [hours, minutes] = time.split(":");
+
+    return {
+        hours: Number(hours),
+        minutes: Number(minutes)
+    };
+}
+
 //#endregion
 
 let text_id = {};
@@ -1821,7 +2796,7 @@ AppSideService(
         text_id = req.textID;
       }
       if (req.method === "GET") {
-        fetchData(res, req.url, req.site, req.type, req.globalData);
+        fetchData(res, req.url, req.site, req.type, req.globalData, req.body);
       }
       if (req.method === "GET_location") {
         fetchLocation(res, req.url, req.site, req.body);

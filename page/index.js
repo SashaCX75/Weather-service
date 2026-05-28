@@ -217,10 +217,12 @@ function updateWidget() {
 
     if (isFinite(weatherJson.sunriseTime)) {
       const sunrise = new Date(weatherJson.sunriseTime);
+      // logger.log(`sunrise = ${sunrise.toString()}`);
       sunriseStr = sunrise.getHours().toString().padStart(2, '0') + ':' + sunrise.getMinutes().toString().padStart(2, '0');
     }
     if (isFinite(weatherJson.sunsetTime)) {
       const sunset = new Date(weatherJson.sunsetTime);
+      // logger.log(`sunset = ${sunset.toString()}`);
       sunsetStr = sunset.getHours().toString().padStart(2, '0') + ':' + sunset.getMinutes().toString().padStart(2, '0');
     }
     if (isFinite(weatherJson.moonriseTime)) {
@@ -659,6 +661,7 @@ function WindUnit () {
   }
   notif_wind.updateValue(windStr, windAngle);
 }
+
 function CelsiusToFahrenheit(celsius) {
   return Math.round((celsius * 9 / 5) + 32);
 }
@@ -1627,6 +1630,7 @@ Page(BasePage({
       logger.log(`погода обновлена`);
     }
     // this.getDataFromNetwork("weather");
+    // this.getDataFromNetwork("forecast");
     
     updateWidget();
       
@@ -1639,16 +1643,17 @@ Page(BasePage({
 
   getDataFromNetwork(type) {
     logger.log(`getDataFromNetwork(${type})`);
+    let site = globalData.site;
+    if (type == "forecast" && site == "Sinoptik") return;
     let context = getCurrentPage();
     if (!connectStatus()){
       showToast({ content: getText("zepp_disconnected") });
       return;
     }
-    let site = globalData.site;
     let urlByGeo = "";
     if (type == "weather") urlByGeo = globalData.urlByGeoWeather;
     if (type == "forecast") urlByGeo = globalData.urlByGeoForecast;
-    // urlByGeo =  `https://www.accuweather.com/ru/ua/kyiv/324505/current-weather/324505`;
+    // urlByGeo =  `https://sinoptik.ua/ru/pohoda/london`;
     logger.log(`urlByGeo = ${urlByGeo}`);
     if (urlByGeo == undefined || urlByGeo == null || urlByGeo.length == 0) {
       showToast({ content: getText("coord_not_update") });
@@ -1661,6 +1666,15 @@ Page(BasePage({
       district: globalData.district,
       timeZone: globalData.timeZone
     }
+    let body_request = undefined;
+    if (site == "Sinoptik") {
+      body_request = JSON.stringify({
+        lang: getText('lang_sinoptik'), // "rus" "ukr" "eng"
+        location_id: globalData.city_key,
+        // location_id: "los-angeles",
+        forecast_days: 10,
+      });
+    }
     logger.log(`globalDataTemp = ${JSON.stringify(globalDataTemp)}`);
     logger.log(`this.request`);
     this.request({
@@ -1668,6 +1682,7 @@ Page(BasePage({
       url: urlByGeo,
       type: type,
       site: site,
+      body: body_request,
       textID: textID,
       globalData: globalDataTemp,
     })
@@ -1686,11 +1701,19 @@ Page(BasePage({
         if (type == 'weather') {
           if (data != undefined && data != null) {
             globalData.weatherJson = data;
+            if (site == "Sinoptik") { // для сайтов с объединенной погодой и прогнозом
+              globalData.weatherJson = data.weather;
+              globalData.forecastJson = data.forecast;
+              globalData.forecastFile.set(globalData.forecastJson);
+            }
             globalData.weatherFile.set(globalData.weatherJson);
             weatherJson = globalData.weatherJson;
             updateWidget();
             showToast({content: getText("weather_update")});
-            context.getDataFromNetwork("forecast");
+            if (site != "Sinoptik") setTimeout(() => {
+              logger.log(`getDataFromNetwork setTimeout forecast`);
+              context.getDataFromNetwork("forecast");
+            }, 1500);
           }
         }
         if (type == 'forecast') {

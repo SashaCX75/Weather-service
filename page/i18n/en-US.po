@@ -130,6 +130,9 @@ msgstr "AccuWeather (API)"
 msgid "site_Sinoptik"
 msgstr "Sinoptik"
 
+msgid "site_OpenMeteo"
+msgstr "Open-Meteo"
+
 msgid "APIkey_invalide"
 msgstr "Enter the correct API key in the settings (in the Zepp app)"
 
@@ -207,6 +210,9 @@ msgstr "Data Receiving Error"
 
 msgid "Donate"
 msgstr "If you like the app, you can donate to the author for coffee"
+
+msgid "smooth_graph_text"
+msgstr "Smooth the graph"
 
 
 

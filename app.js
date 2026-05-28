@@ -37,6 +37,7 @@ App(BaseApp({
     this.globalData.AccuWeather_APIkey = storage.getKey("AccuWeather_APIkey", "");
 
     this.globalData.city_name = storage.getKey("city_name", "");
+    this.globalData.city_key = storage.getKey("city_key", "");
     this.globalData.district = storage.getKey("district", "");
     this.globalData.timeZone = storage.getKey("timeZone", "");
 

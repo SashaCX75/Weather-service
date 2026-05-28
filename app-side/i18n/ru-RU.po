@@ -1,0 +1,156 @@
+msgid "cloudMap_clear"
+msgstr "ясно"
+
+msgid "cloudMap_mostly_clear"
+msgstr "малооблачно"
+
+msgid "cloudMap_partly_cloudy"
+msgstr "переменная облачность"
+
+msgid "cloudMap_cloudy"
+msgstr "облачно"
+
+msgid "cloudMap_overcast"
+msgstr "пасмурно"
+
+msgid "cloudMap_fog"
+msgstr "туман"
+
+
+
+msgid "intensityMap_light"
+msgstr "небольшой"
+
+msgid "intensityMap_heavy"
+msgstr "сильный"
+
+
+msgid "typeMap_rain"
+msgstr "дождь"
+
+msgid "typeMap_sleet"
+msgstr "мокрый снег"
+
+msgid "typeMap_snow"
+msgstr "снег"
+
+msgid "typeMap_hail"
+msgstr "град"
+
+
+msgid "special_thunderstorm"
+msgstr "гроза"
+
+msgid "special_snowfall"
+msgstr "снегопад"
+
+msgid "special_heavy_hail"
+msgstr "сильный град"
+
+msgid "special_heavy_rainfall"
+msgstr "сильные осадки"
+
+msgid "special_sleet"
+msgstr "дождь со снегом"
+
+msgid "special_heavy_sleet"
+msgstr "сильный дождь со снегом"
+
+msgid "precipitation"
+msgstr "осадки"
+
+
+
+msgid "openmeteo_clear"
+msgstr "Ясно"
+
+msgid "openmeteo_mainly_clear"
+msgstr "Малооблачно"
+
+msgid "openmeteo_partly_cloudy"
+msgstr "Переменная облачность"
+
+msgid "openmeteo_overcast"
+msgstr "Пасмурно"
+
+
+msgid "openmeteo_fog"
+msgstr "Туман"
+
+msgid "openmeteo_depositing_rime"
+msgstr "Туман с инеем"
+
+
+msgid "openmeteo_light_drizzle"
+msgstr "Слабый моросящий дождь"
+
+msgid "openmeteo_moderate_drizzle"
+msgstr "Моросящий дождь"
+
+msgid "openmeteo_intensity_drizzle"
+msgstr "Сильный моросящий дождь"
+
+msgid "openmeteo_light_freezing_drizzle"
+msgstr "Слабая ледяная морось"
+
+msgid "openmeteo_intensity_freezing_drizzle"
+msgstr "Сильная ледяная морось"
+
+
+msgid "openmeteo_light_rain"
+msgstr "Слабый дождь"
+
+msgid "openmeteo_moderate_rain"
+msgstr "Дождь"
+
+msgid "openmeteo_intensity_rain"
+msgstr "Сильный дождь"
+
+msgid "openmeteo_light_freezing_rain"
+msgstr "Слабый ледяной дождь"
+
+msgid "openmeteo_intensity_freezing_rain"
+msgstr "Сильный ледяной дождь"
+
+
+msgid "openmeteo_light_snow"
+msgstr "Слабый снег"
+
+msgid "openmeteo_moderate_snow"
+msgstr "Снег"
+
+msgid "openmeteo_intensity_snow"
+msgstr "Снегопад"
+
+msgid "openmeteo_snow_grains"
+msgstr "Снежная крупа"
+
+
+msgid "openmeteo_light_rain_showers"
+msgstr "Слабый ливень"
+
+msgid "openmeteo_moderate_rain_showers"
+msgstr "Ливень"
+
+msgid "openmeteo_intensity_rain_showers"
+msgstr "Сильный ливень"
+
+
+msgid "openmeteo_light_snow_showers"
+msgstr "Слабый снегопад"
+
+msgid "openmeteo_intensity_snow_showers"
+msgstr "Сильный снегопад"
+
+
+msgid "openmeteo_thunderstorm"
+msgstr "Гроза"
+
+msgid "openmeteo_thunderstorm_with_hail"
+msgstr "Гроза с градом"
+
+msgid "openmeteo_thunderstorm_with_heavy_hail"
+msgstr "Гроза с сильным градом"
+
+msgid "openmeteo_unknown"
+msgstr "Неизвестная погода"

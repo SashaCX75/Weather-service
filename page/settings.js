@@ -36,6 +36,7 @@ const SERVICE_NAME = "app-service/weather_service";
 const permissions = ["device:os.bg_service"];
 
 let globalData = getApp()._options.globalData;
+let storage = globalData.storage;
 let weather_service = false;
 let weather_alarm_service = false;
 let geoBtn;
@@ -53,6 +54,8 @@ let viewContainer;
 
 let latitude = 0;
 let longitude = 0;
+
+let smooth_graph = JSON.parse(storage.getKey('smooth_graph', false));
 
 //#region functions
 function GetTextID() {
@@ -112,6 +115,8 @@ function updateCoordinates(/*context,*/ lat = 0, lon = 0 ) {
 
 function updateURL(/*context,*/ new_site, lat = 0, lon = 0) {
   logger.log(`updateURL (${new_site})`);
+  lat = Number(lat);
+  lon = Number(lon);
   
   // let old_site = globalData.site;
   if (lat == 0 && lon == 0) {
@@ -131,8 +136,7 @@ function updateURL(/*context,*/ new_site, lat = 0, lon = 0) {
     }
   })
     .then((result) => {
-      logger.log("SET_location");
-      logger.log(`result = ${JSON.stringify(result)}`);
+      logger.log(`updateURL() SET_location result = ${JSON.stringify(result)}`);
     })
     .catch((error) => {
       logger.error("error=>", error);
@@ -162,8 +166,8 @@ function updateURL(/*context,*/ new_site, lat = 0, lon = 0) {
     globalData.storage.setKey("urlByGeoWeather", globalData.urlByGeoWeather);
     globalData.storage.setKey("urlByGeoForecast", globalData.urlByGeoForecast);
     globalData.storage.setKey("site", globalData.site);
-    logger.log(`urlByGeoWeather = ${globalData.urlByGeoWeather}`);
-    logger.log(`urlByGeoForecast = ${globalData.urlByGeoForecast}`);
+    // logger.log(`urlByGeoWeather = ${globalData.urlByGeoWeather}`);
+    // logger.log(`urlByGeoForecast = ${globalData.urlByGeoForecast}`);
     logger.log(`site = ${globalData.site}`);
         
     context.getDataFromNetwork("weather");
@@ -171,7 +175,6 @@ function updateURL(/*context,*/ new_site, lat = 0, lon = 0) {
     //   logger.log(`getDataFromNetwork forecast OpenWeather_API`);
     //   context.getDataFromNetwork("forecast");
     // }, 1500);
-    // context.getDataFromNetwork("forecast");
     return;
   }
   if (new_site == 'AccuWeather') {
@@ -191,12 +194,12 @@ function updateURL(/*context,*/ new_site, lat = 0, lon = 0) {
       site: 'AccuWeather',
     })
       .then((result) => {
-        logger.log("receive location AccuWeather");
+        logger.log("updateURL() result GET_location AccuWeather");
         const { status, data, error } = result;
         if (status != "success" || Object.keys(data).length < 3) {
           logger.log(`AccuWeather error => ${JSON.stringify(error)}`);
           if (error.toString().includes("The allowed number of requests has been exceeded")) showToast({ content: getText("number_of_requests") });
-          if (error.toString().includes("Invalid API Key")) showToast({ content: getText("APIkey_invalide") });
+          // if (error.toString().includes("Invalid API Key")) showToast({ content: getText("APIkey_invalide") });
           SlideSwitchSelect();
           AnimationStop();
           return;
@@ -207,17 +210,21 @@ function updateURL(/*context,*/ new_site, lat = 0, lon = 0) {
         let city_name = data.city_name;
         let city_id1 = data.city_id1;
         let city_id2 = data.city_id2;
+        let location_id = data.location_id;
         logger.log(`city_name = ${city_name}`);
         logger.log(`city_id1 = ${city_id1}`);
         logger.log(`city_id2 = ${city_id2}`);
+        logger.log(`location_id = ${location_id}`);
 
         // let lang = globalData.lang;
         let lang = getText('lang');
         //  let lang = 'ru';
         // let lang = 'en';
 
-        globalData.urlByGeoWeather = `https://www.accuweather.com/${lang}/${city_name}/${city_id1}/current-weather/${city_id2}`;
-        globalData.urlByGeoForecast = `https://www.accuweather.com/${lang}/${city_name}/${city_id1}/daily-weather-forecast/${city_id2}`;
+        globalData.urlByGeoWeather = `https://www.accuweather.com/${lang}/${location_id}/${city_name}/${city_id1}/current-weather/${city_id2}`;
+        // globalData.urlByGeoWeather = `https://www.accuweather.com/${lang}/${city_name}/${city_id1}/current-weather/${city_id2}`;
+        globalData.urlByGeoForecast = `https://www.accuweather.com/${lang}/${location_id}/${city_name}/${city_id1}/daily-weather-forecast/${city_id2}`;
+        // globalData.urlByGeoForecast = `https://www.accuweather.com/${lang}/${city_name}/${city_id1}/daily-weather-forecast/${city_id2}`;
         globalData.site = new_site;
         globalData.storage.setKey("urlByGeoWeather", globalData.urlByGeoWeather);
         globalData.storage.setKey("urlByGeoForecast", globalData.urlByGeoForecast);
@@ -227,6 +234,7 @@ function updateURL(/*context,*/ new_site, lat = 0, lon = 0) {
         logger.log(`site = ${globalData.site}`);
         
         context.getDataFromNetwork("weather");
+        // context.getDataFromNetwork("forecast");
         return;
       })
       .catch((error) => {
@@ -259,7 +267,7 @@ function updateURL(/*context,*/ new_site, lat = 0, lon = 0) {
       site: 'AccuWeather_API',
     })
       .then((result) => {
-        logger.log("receive location AccuWeather_API");
+        logger.log("updateURL() result GET_location AccuWeather_API");
         const { status, data, error } = result;
         if (status != "success" || Object.keys(data).length < 3) {
           logger.log(`AccuWeather_API error => ${JSON.stringify(error)}`);
@@ -305,7 +313,7 @@ function updateURL(/*context,*/ new_site, lat = 0, lon = 0) {
       AnimationStop();
       return;
     }
-    let lang = getText('lang_sinoptik');
+    // let lang = getText('lang_sinoptik');
     let url = `https://sinoptik.uk/api/location/determine`
     logger.log(`GET_location Sinoptik`);
     context.request({
@@ -315,13 +323,15 @@ function updateURL(/*context,*/ new_site, lat = 0, lon = 0) {
         coordinates: {
           lat: lat, 
           lng: lon
+          // lat: 50, 
+          // lng: 30
         }, 
-        lang: "rus" // "ukr" "eng"
+        lang: getText('lang_sinoptik') // "rus" "ukr" "eng"
       }),
       site: 'Sinoptik',
     })
       .then((result) => {
-        logger.log("receive location Sinoptik");
+        logger.log("updateURL() result GET_location Sinoptik");
         const { status, data, error } = result;
         if (status != "success" || Object.keys(data).length < 2) {
           logger.log(`Sinoptik error => ${JSON.stringify(error)}`);
@@ -355,6 +365,7 @@ function updateURL(/*context,*/ new_site, lat = 0, lon = 0) {
         logger.log(`urlByGeoWeather = ${globalData.urlByGeoWeather}`);
         logger.log(`urlByGeoForecast = ${globalData.urlByGeoForecast}`);
         logger.log(`site = ${globalData.site}`);
+        logger.log(`city_key = ${globalData.city_key}`);
         
         context.getDataFromNetwork("weather");
         return;
@@ -363,9 +374,66 @@ function updateURL(/*context,*/ new_site, lat = 0, lon = 0) {
         logger.error("error=>", error);
       });
   }
+  if (new_site == 'OpenMeteo') {
+    if (!connectStatus()){
+      showToast({ content: getText("zepp_disconnected") });
+      SlideSwitchSelect();
+      AnimationStop();
+      return;
+    }
+    let lang = getText('lang');
+    let url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&layer=address&accept-language=${lang}`;
+    logger.log(`GET_location OpenMeteo`);
+    context.request({
+      method: 'GET_location',
+      url: url,
+      site: 'OpenMeteo',
+    })
+      .then((result) => {
+        logger.log("updateURL() result GET_location OpenMeteo");
+        const { status, data, error } = result;
+        if (status != "success" || data.city_name == undefined) {
+          logger.log(`OpenMeteo error => ${JSON.stringify(error)}`);
+          logger.log(`OpenMeteo data => ${JSON.stringify(data)}`);
+          showToast({ content: getText("site_error") });
+          SlideSwitchSelect();
+          AnimationStop();
+          return;
+        }
+        logger.log(`result = ${JSON.stringify(result)}`);
+        logger.log(`JSON data = ${JSON.stringify(data)}`);
+        
+        globalData.city_name = data.city_name;
+        globalData.district = data.district;
+        globalData.storage.setKey("city_name", globalData.city_name);
+        globalData.storage.setKey("district", globalData.district);
+        // let city_key = data.address.postcode;
+        logger.log(`city_name = ${globalData.city_name}`);
+        logger.log(`district = ${globalData.district}`);
 
-  // context.getDataFromNetwork("weather");
-  // context.getDataFromNetwork("forecast");
+        let lang = getText('lang');
+
+        // globalData.urlByGeoWeather = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,uv_index_max,cloud_cover_max,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,sunrise,sunset&current=weather_code,temperature_2m,apparent_temperature,uv_index,cloud_cover,visibility,relative_humidity_2m,precipitation,precipitation_probability,surface_pressure,wind_speed_10m,wind_gusts_10m,wind_direction_10m,is_day&timezone=auto&wind_speed_unit=ms&temporal_resolution=hourly_6&forecast_days=10`;
+        globalData.urlByGeoWeather = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset&current=weather_code,temperature_2m,apparent_temperature,uv_index,cloud_cover,visibility,relative_humidity_2m,precipitation,precipitation_probability,surface_pressure,wind_speed_10m,wind_gusts_10m,wind_direction_10m,is_day&timezone=auto&wind_speed_unit=ms`;
+        globalData.urlByGeoForecast = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,uv_index_max,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,sunrise,sunset&hourly=weather_code,temperature_2m,apparent_temperature,uv_index,cloud_cover,visibility,relative_humidity_2m,surface_pressure&timezone=auto&wind_speed_unit=ms&temporal_resolution=hourly_6&forecast_days=10`;
+        globalData.site = new_site;
+        globalData.storage.setKey("urlByGeoWeather", globalData.urlByGeoWeather);
+        globalData.storage.setKey("urlByGeoForecast", globalData.urlByGeoForecast);
+        globalData.storage.setKey("site", globalData.site);
+        logger.log(`urlByGeoWeather = ${globalData.urlByGeoWeather}`);
+        logger.log(`urlByGeoForecast = ${globalData.urlByGeoForecast}`);
+        logger.log(`site = ${globalData.site}`);
+        
+        context.getDataFromNetwork("weather");
+        return;
+      })
+      .catch((error) => {
+        logger.error("error=>", error);
+        showToast({ content: getText("site_error") });
+        SlideSwitchSelect();
+        AnimationStop();
+      });
+  }
 
 }
 
@@ -386,15 +454,8 @@ function updateWidget() {
   strValue = "--";
   let weatherJson = globalData.weatherJson;
   if (weatherJson != undefined && weatherJson != null) {
-    if (
-      weatherJson.city != undefined &&
-      weatherJson.city != null &&
-      weatherJson.city.length > 0
-    ) {
-      strValue = weatherJson.city;
-    }
+    if (weatherJson.city != undefined && weatherJson.city != null && weatherJson.city.length > 0 ) strValue = weatherJson.city;
   }
-  // textCity.setProperty(prop.TEXT, strValue);
   textCity.updateText(strValue);
 
   setGeoBtnStyle();
@@ -486,7 +547,7 @@ function StartStop_AlarmBGservice() {
       }
     }
     if (urlByGeoForecast != undefined && urlByGeoForecast != null && urlByGeoForecast.length > 0) {
-      delay += 25;
+      delay += 45;
       const param = {
         httpRequestType: "forecast",
       };
@@ -613,6 +674,10 @@ function SiteChanged(index) {
     case 3: // Sinoptik
       new_site = 'Sinoptik';
       break;
+    
+    case 4: // OpenMeteo
+      new_site = 'OpenMeteo';
+      break;
   }
   
   logger.log(`siteChanged(old_site = ${old_site}, new_site = ${new_site})`);
@@ -633,10 +698,18 @@ function SlideSwitchSelect () {
       select_index = 1;
       break;
       
-    case 'Sinoptik':
+    case 'AccuWeather_API':
       select_index = 2;
       break;
-  
+      
+    case 'Sinoptik':
+      select_index = 3;
+      break;
+      
+    case 'OpenMeteo':
+      select_index = 4;
+      break;
+
     default:
       select_index = 0;
       break;
@@ -915,13 +988,13 @@ class RadioBox {
     let context = this;
     for (let index = 0; index < text_arrey.length; index++) {
       this.group.createWidget(widget.IMG, {
-        x: px(65),
-        y: px(index*100 + 25),
+        x: px(70),
+        y: px(index*100 + 15),
         src: src_arrey[index]
       })
 
       this.group.createWidget(widget.TEXT, {
-        x: px(100),
+        x: px(130),
         y: px(index*100),
         w: group_width + px(100),
         h: px(80),
@@ -977,10 +1050,129 @@ class RadioBox {
   }
 }
 
+class CheckBoxVector {
+  constructor(props = {}) {
+    this.text = text;
+    this.checked = checked;
+    // logger.log(`CheckBoxVector constructor`);
+    this.props = {
+      x: 0,
+      y: 0,
+      w: DEVICE_WIDTH,
+      h: px(56),
+      offset: px(10),										// отступ названия от переключателя
+      text_color: 0xffffff,							// цвет названия
+      text_size: px(32),				        // размер текста
+      text: '',												  // текст названия переключателя					
+      char_space: 0,
+      align_h: align.LEFT,
+      align_v: align.CENTER_V,
+      text_style: text_style.WRAP,
+      line_space: px(-22),
+      bg_offColor: 0x313131,            // Цвет фона в неактивном состоянии.
+      bg_onColor: 0x0986d4,             // Необязательный параметр, цвет фона в активном состоянии
+      fg_offColor: 0x555555,            // Цвет ползунка в активном состоянии
+      fg_onColor: 0xffffff,             // Необязательный параметр, цвет ползунка в активном состоянии
+      checked: false,                   // Необязательный параметр, состояние переключателя
+      click_func: null,									// функция на нажатие
+      ...props,
+    };
+
+    if (this.props.group == undefined || this.props.group == null) this.props.group = createWidget(widget.GROUP, {
+      x: 0,
+      y: 0,
+      w: DEVICE_WIDTH,
+      h: DEVICE_HEIGHT,
+    });
+
+    if (this.props.bg_size == undefined || this.props.bg_size == null) this.props.bg_size = this.props.h;
+    if (this.props.fg_size == undefined || this.props.fg_size == null) this.props.fg_size = this.props.h / 2;
+    if (this.props.bg_radius == undefined || this.props.bg_radius == null) this.props.bg_radius = this.props.bg_size / 4.5;
+    if (this.props.fg_radius == undefined || this.props.fg_radius == null) this.props.fg_radius = this.props.fg_size / 3;
+
+    if (this.props.click_func == null) this.props.click_func = () => { };
+    this.props.w = props.w ?? this.props.w - this.props.x;
+    if (this.props.w < this.props.bg_size) this.props.w = this.props.bg_size;
+    this.props.check_box_offsetBg = (this.props.h - this.props.bg_size) / 2;
+    this.props.check_box_offsetFg_Y = (this.props.h - this.props.fg_size) / 2;
+    this.props.check_box_offsetFg_X = (this.props.bg_size - this.props.fg_size) / 2;
+
+    this._checkBoxBg = '';
+    this._checkBoxFg = '';
+    this._caption = '';
+    this._rect = '';
+    this.create();
+  }
+
+  // создаем переключатель
+  create() {
+    // logger.log(`CheckBoxVector create`);
+
+    // задний фон переключателя
+    this._checkBoxBg = this.props.group.createWidget(widget.FILL_RECT, {
+      x: this.props.x,
+      y: this.props.y + this.props.check_box_offsetBg,
+      w: this.props.bg_size,
+      h: this.props.bg_size,
+      radius: this.props.bg_radius,
+      color: this.props.checked ? this.props.bg_onColor : this.props.bg_offColor,
+    });
+
+    // точка на переключателе
+    this._checkBoxFg = this.props.group.createWidget(widget.FILL_RECT, {
+      x: this.props.x + this.props.check_box_offsetFg_X,
+      y: this.props.y + this.props.check_box_offsetFg_Y,
+      w: this.props.fg_size,
+      h: this.props.fg_size,
+      radius: this.props.bg_radius,
+      color: this.props.checked ? this.props.fg_onColor : this.props.fg_offColor,
+    });
+
+    // заголовок переключателя
+    this._caption = this.props.group.createWidget(widget.TEXT, {
+      ...this.props,
+      x: this.props.x + this.props.bg_size + this.props.offset,
+      // y: this.props.y ,
+      w: this.props.w > this.props.bg_size ? this.props.w - (this.props.bg_size + this.props.offset) : 0,
+      // h: this.props.h,
+      color: this.props.text_color,
+      text: this.props.text,
+    });
+
+    // область реагирования на нажатия
+    this._rect = this.props.group.createWidget(widget.STROKE_RECT, {
+      ...this.props,
+      alpha: 0,
+      color: 0x000000,
+    });
+    this._rect.addEventListener(event.CLICK_UP, (info) => this.onClickUp(info, index));
+  }
+
+  // обработчик нажатия на переключатель
+  onClickUp() {
+    logger.log(`CheckBoxVector onClickUp()`);
+    this.toggle();
+  }
+
+  // переключить состояние
+  toggle() {
+    logger.log(`toggle from ${this.props.checked} to ${!this.props.checked}`);
+    this.props.checked = !this.props.checked;
+    this._checkBoxBg.setProperty(prop.COLOR, this.props.checked ? this.props.bg_onColor : this.props.bg_offColor);
+    this._checkBoxFg.setProperty(prop.COLOR, this.props.checked ? this.props.fg_onColor : this.props.fg_offColor);
+    this.props.click_func(this.props.checked);
+  }
+
+}
+
 Page(
   BasePage({
     build() {
       logger.log(`build`);
+      // logger.warn(`warn`);
+      // logger.debug(`debug`);
+      // logger.info(`info`);
+      // logger.error(`test`);
       // globalData.storage.deleteAll();
       latitude = globalData.latitude;
       longitude = globalData.longitude;
@@ -1016,13 +1208,7 @@ Page(
       //#region City
       let weatherJson = globalData.weatherJson;
       if (weatherJson != undefined && weatherJson != null) {
-        if (
-          weatherJson.city != undefined &&
-          weatherJson.city != null &&
-          weatherJson.city.length > 0
-        ) {
-          strValue = weatherJson.city;
-        }
+        if (weatherJson.city != undefined && weatherJson.city != null && weatherJson.city.length > 0 ) strValue = weatherJson.city;
       }
 
       textCity = new TextField(0, px(30), getText("city"), strValue, viewContainer);
@@ -1101,10 +1287,10 @@ Page(
       //#endregion
 
       //#region выбор сайта
-      // let text_arrey = [getText("site_OpenWeather_API"), getText("site_AccuWeather"), getText("site_AccuWeather_API"), getText("site_Sinoptik")];
-      // let src_arrey = ['logo_OpenWeather.png', 'logo_AccuWeather.png', 'logo_AccuWeather.png', 'logo_Sinoptik.png'];
-      let text_arrey = [getText("site_OpenWeather_API"), getText("site_AccuWeather"), getText("site_AccuWeather_API")];
-      let src_arrey = ['logo_OpenWeather.png', 'logo_AccuWeather.png', 'logo_AccuWeather.png'];
+      let text_arrey = [getText("site_OpenWeather_API"), getText("site_AccuWeather"), getText("site_AccuWeather_API"), getText("site_Sinoptik"), getText("site_OpenMeteo")];
+      let src_arrey = ['logo_OpenWeather.png', 'logo_AccuWeather.png', 'logo_AccuWeather.png', 'logo_Sinoptik.png', 'logo_OpenMeteo.png'];
+      // let text_arrey = [getText("site_OpenWeather_API"), getText("site_AccuWeather"), getText("site_AccuWeather_API")];
+      // let src_arrey = ['logo_OpenWeather.png', 'logo_AccuWeather.png', 'logo_AccuWeather.png'];
       let select_index = 0;
       switch (globalData.site) {
         case 'OpenWeather_API':
@@ -1122,13 +1308,17 @@ Page(
         case 'Sinoptik':
           select_index = 3;
           break;
+          
+        case 'OpenMeteo':
+          select_index = 4;
+          break;
       
         default:
           select_index = 0;
           break;
       };
       logger.log(`select_index = ${select_index}`);
-      radioBox = new RadioBox (site_block_offset + px(20), px(370), viewContainer, text_arrey,src_arrey, select_index);
+      radioBox = new RadioBox (site_block_offset + px(20), px(390), viewContainer, text_arrey,src_arrey, select_index);
       //#endregion
 
       // let temp_mask = viewContainer.createWidget(widget.FILL_RECT, {
@@ -1144,8 +1334,40 @@ Page(
       //#region разделитель 3
       viewContainer.createWidget(widget.FILL_RECT, {
         x: (DEVICE_WIDTH - px(400)) / 2,
-        y: site_block_offset + px(320),
-        // y: site_block_offset + px(420),
+        // y: site_block_offset + px(320),
+        y: site_block_offset + px(520),
+        w: px(400),
+        h: 3,
+        color: 0xa0a0a0
+      })
+      //#endregion
+
+      //#region сглаженный график
+      new CheckBoxVector({
+        x: (DEVICE_WIDTH - px(370)) / 2,
+        y: site_block_offset + px(520),
+        w: px(370),
+        h: px(80),
+        checked: smooth_graph,
+        text: getText("smooth_graph_text"),
+        group: viewContainer,
+        text_size: px(26),
+        bg_size: px(40),
+        fg_size: px(24),
+        offset: px(10),
+        click_func: (checked) => {
+          logger.log(`click_func`);
+          smooth_graph = checked;
+          storage.setKey('smooth_graph', smooth_graph);
+        },
+      });
+      //#endregion
+
+      //#region разделитель 3
+      viewContainer.createWidget(widget.FILL_RECT, {
+        x: (DEVICE_WIDTH - px(400)) / 2,
+        // y: site_block_offset + px(320),
+        y: site_block_offset + px(600),
         w: px(400),
         h: 3,
         color: 0xa0a0a0
@@ -1155,8 +1377,8 @@ Page(
       //#region Donate
       viewContainer.createWidget(widget.TEXT, {
         x: (DEVICE_WIDTH - px(400)) / 2,
-        y: site_block_offset + px(340),
-        // y: site_block_offset + px(440),
+        // y: site_block_offset + px(340),
+        y: site_block_offset + px(620),
         w: px(400), 
         h: px(100),
         text: getText("Donate"),
@@ -1170,7 +1392,8 @@ Page(
 
       viewContainer.createWidget(widget.IMG, {
         x: (DEVICE_WIDTH - px(250)) / 2,
-        y: site_block_offset + px(450),
+        // y: site_block_offset + px(450),
+        y: site_block_offset + px(730),
         w: px(250),
         h: px(250),
         src: 'bmc_qr.png',
@@ -1274,19 +1497,28 @@ Page(
         district: globalData.district,
         timeZone: globalData.timeZone
       }
+      let body_request = undefined;
+      if (site == "Sinoptik") {
+        body_request = JSON.stringify({
+          lang: getText('lang_sinoptik'), // "rus" "ukr" "eng"
+          location_id: globalData.city_key,
+          forecast_days: 10,
+        });
+      }
       this.request({
         method: "GET",
         url: urlByGeo,
         type: type,
         site: site,
+        body: body_request,
         textID: textID,
         globalData: globalDataTemp,
       })
         .then((result) => {
-          logger.log(`receive data ${site}`);
+          logger.log(`result getDataFromNetwork (${site})`);
           AnimationStop();
           const { status, data, error } = result;
-          if (status != "success" || Object.keys(data).length < 3) {
+          if (status != "success" || Object.keys(data).length < 2) {
             logger.log(`error => ${JSON.stringify(error)}`);
             if (error.toString().includes("The allowed number of requests has been exceeded")) showToast({ content: getText("number_of_requests") });
             if (error.toString().includes("Invalid API Key")) showToast({ content: getText("APIkey_invalide") });
@@ -1297,10 +1529,19 @@ Page(
 
           if (type == "weather") {
             globalData.weatherJson = data;
+            if (site == "Sinoptik") { // для сайтов с объединенной погодой и прогнозом
+              globalData.weatherJson = data.weather;
+              globalData.forecastJson = data.forecast;
+              globalData.forecastFile.set(globalData.forecastJson);
+            }
             showToast({ content: getText("weather_update") });
             globalData.weatherFile.set(globalData.weatherJson);
             updateWidget();
-            context.getDataFromNetwork("forecast");
+            // context.getDataFromNetwork("forecast");
+            if (site != "Sinoptik") setTimeout(() => {
+              logger.log(`getDataFromNetwork setTimeout forecast`);
+              context.getDataFromNetwork("forecast");
+            }, 1500);
           }
           if (type == "forecast") {
             globalData.forecastJson = data;

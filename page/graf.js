@@ -24,6 +24,11 @@ let colorMax = 0xf04119;
 let colorMin = 0x10aaff;
 
 let canvas;
+let polyline_max;
+let polyline_min;
+let smooth_graph = JSON.parse(storage.getKey('smooth_graph', false));
+let pointsMaxTemperature = [];
+let pointsMinTemperature = [];
 
 //#region functions
 function drawLine(x1, y1, x2, y2, color, line_width) {
@@ -89,20 +94,20 @@ function graphScale(heightGraph, maxPointSize, minPointSize, forecastData, daysC
 	logger.log(`forecastData.length: ${forecastData.length}`);
 	// logger.log(`forecastData: ${JSON.stringify(forecastData)}`);
 	heightGraph -= (maxPointSize + minPointSize) / 2;
-	let high = -300;
-	let low = 300;
+	let high_temp = -300;
+	let low_temp = 300;
 	for (let index = 0; index < daysCount; index++) {
 		if (index < forecastData.length) {
 			logger.log(`forecastData[${index}]: ${JSON.stringify(forecastData[index])}`);
 			let item = forecastData[index];
-			if (item.high > high) high = item.high;
-			if (item.low < low) low = item.low;
+			if (item.high > high_temp) high_temp = item.high;
+			if (item.low < low_temp) low_temp = item.low;
 		} // end if
 	} // end for
-	let delta = high - low;
-	let scale = heightGraph / delta;
-	logger.log(`heightGraph: ${heightGraph}; high: ${high}; low : ${low}`);
-	return {graphScale: scale, maximal_temp: high};
+	let delta_temp = high_temp - low_temp;
+	let scale = heightGraph / delta_temp;
+	logger.log(`heightGraph: ${heightGraph}; high: ${high_temp}; low : ${low_temp}`);
+	return {graphScale: scale, maximal_temp: high_temp};
 };
 
 function weather_few_days(forecastData) {
@@ -116,9 +121,14 @@ function weather_few_days(forecastData) {
 	result = graphScale(125, 10, 10, forecastData, 5);
 	let forecastGraphScale = result.graphScale;
 	let maximal_temp = result.maximal_temp;
-	// logger.log(`forecastGraphScale = ${forecastGraphScale}, maximal_temp = ${maximal_temp}`);
+	logger.log(`forecastGraphScale = ${forecastGraphScale}, maximal_temp = ${maximal_temp}`);
 
 	canvas.clear({x: 0, y:0, w: DEVICE_WIDTH, h: px(150)});
+	polyline_max.clear();
+	polyline_min.clear();
+	pointsMaxTemperature = [];
+	pointsMinTemperature = [];
+
 	let max_offsetX = 5;
 	maxOldX = max_offsetX;
 	let maxOldY = px((maximal_temp - forecastData[0].high) * forecastGraphScale + 5);
@@ -166,6 +176,95 @@ function weather_few_days(forecastData) {
 	};
 };
 
+function weather_few_days_smooth(forecastData) {
+	logger.log('weather_few_days_smooth()');
+	// let weatherData = weatherSensor.getForecastWeather();
+	// let forecastData = weatherData.forecastData;
+	let result = {graphScale: 1, maximal_temp: 0};
+	let maxOldX = 0;
+	let minOldX = 0;
+
+	result = graphScale(115, 10, 10, forecastData, 5);
+	let forecastGraphScale = result.graphScale;
+	let maximal_temp = result.maximal_temp;
+	logger.log(`forecastGraphScale = ${forecastGraphScale}, maximal_temp = ${maximal_temp}`);
+
+	canvas.clear({x: 0, y:0, w: DEVICE_WIDTH, h: px(150)});
+	polyline_max.clear();
+	polyline_min.clear();
+	pointsMaxTemperature = [];
+	pointsMinTemperature = [];
+
+	let max_offsetX = 5;
+	maxOldX = max_offsetX;
+	let maxOldY = px((maximal_temp - forecastData[0].high) * forecastGraphScale + 5);
+	let endPointMax = false;
+	let min_offsetX = 5;
+	minOldX = min_offsetX;
+	let minOldY = px((maximal_temp - forecastData[0].low) * forecastGraphScale + 5);
+	let endPointMin = false;
+	for (let i = 0; i < 5; i++) {
+		// Graph
+		if (i < forecastData.length) {
+			let maxStartX = maxOldX;
+			let maxStartY = maxOldY;
+			maxOldX = px(max_offsetX + i * 80);
+			maxOldY = px((maximal_temp - forecastData[i].high) * forecastGraphScale + 5);
+			let maxEndX = maxOldX;
+			let maxEndY = maxOldY;
+			if (maxStartX != maxEndX) {
+				maxStartY += px(5);
+				drawGraphPoint(maxStartX, maxStartY, colorMax, 8, 3);
+				pointsMaxTemperature.push({x: maxStartX, y: maxStartY});
+				endPointMax = true;
+			};
+		
+			let minStartX = minOldX;
+			let minStartY = minOldY;
+			minOldX = px(min_offsetX + i * 80);
+			minOldY = px((maximal_temp - forecastData[i].low) * forecastGraphScale + 5);
+			let minEndX = minOldX;
+			let minEndY = minOldY;
+			if (minStartX != minEndX) {
+				minStartY += px(5);
+				drawGraphPoint(minStartX, minStartY, colorMin, 8, 3);
+				pointsMinTemperature.push({x: minStartX, y: minStartY});
+				endPointMin = true;
+			};
+		
+		};
+		
+	};  // end for
+
+	if (endPointMax) {
+		maxOldY += px(5);
+		drawGraphPoint(maxOldX, maxOldY, colorMax, 8, 3)
+		pointsMaxTemperature.push({x: maxOldX, y: maxOldY});
+	};
+	if (endPointMin) {
+		minOldY += px(5);
+		drawGraphPoint(minOldX, minOldY, colorMin, 8, 3)
+		pointsMinTemperature.push({x: minOldX, y: minOldY});
+	};
+
+	polyline_max.addLine({
+		data: pointsMaxTemperature,
+		count: pointsMaxTemperature.length,
+		line_color: colorMax,
+		curve_style: true,
+	});
+	polyline_min.addLine({
+		data: pointsMinTemperature,
+		count: pointsMinTemperature.length,
+		line_color: colorMin,
+		curve_style: true,
+  });
+	
+};
+
+function CelsiusToFahrenheit(celsius) {
+  return Math.round((celsius * 9 / 5) + 32);
+}
 //#endregion
 
 class Day {
@@ -328,6 +427,7 @@ Page(BasePage({
 
 		let forecastData = [];
 		if (forecastJson && forecastJson.forecast) {
+			let temperature_unit = storage.getKey("temperature_unit", 0);
 			for (let index = 0; index < 5; index++) {
         let dow_index = 0;
         let dateStr = "--";
@@ -339,12 +439,13 @@ Page(BasePage({
 
 				if (index < forecastJson.forecast.length) {
 					let forecast_element = forecastJson.forecast[index];
-	        // logger.log(`forecast_element = ${JSON.stringify(forecast_element)}`);
+	        logger.info(`forecast_element = ${JSON.stringify(forecast_element)}`);
 	
 	        //#region strings
 	          
 	        if (isFinite(forecast_element.weatherTime)) {
 	          const weatherTime = new Date(forecast_element.weatherTime);
+						logger.info(`forecast_eweatherTimelement = ${weatherTime.toString()}`);
 	          dow_index = weatherTime.getDay();
 	          const currentDateFormat = getDateFormat();
 	          if (currentDateFormat === DATE_FORMAT_DMY) {
@@ -366,8 +467,8 @@ Page(BasePage({
 	          icon = `card/icon${iconSrc}.png`;
 	        }
 					
+					logger.info(`temperature_unit = ${temperature_unit}`);
 	        if (isFinite(forecast_element.temperatureMin)) {
-	          let temperature_unit = storage.getKey("temperature_unit", 0);
 						forecastElement.low = forecast_element.temperatureMin;
 	          let temperature = parseFloat(forecast_element.temperatureMin).toFixed(0);
 	          if (temperature_unit == 1) {
@@ -378,7 +479,6 @@ Page(BasePage({
 	          if (temperature > 0) tempMinStr = '+' + tempMinStr;
 	        }
 	        if (isFinite(forecast_element.temperatureMax)) {
-	          let temperature_unit = storage.getKey("temperature_unit", 0);
 						forecastElement.high = forecast_element.temperatureMax;
 	          let temperature = parseFloat(forecast_element.temperatureMax).toFixed(0);
 	          if (temperature_unit == 1) {
@@ -422,7 +522,35 @@ Page(BasePage({
 			w: DEVICE_WIDTH,
 			h: px(150),
 		});
-		weather_few_days(forecastData);
+		polyline_max = group_ForecastWeather.createWidget(widget.GRADKIENT_POLYLINE, {
+			x: -5,
+			y: 0,
+			w: DEVICE_WIDTH,
+			h: px(150),
+			line_color: colorMax,
+			line_width: 3
+		});
+		polyline_min = group_ForecastWeather.createWidget(widget.GRADKIENT_POLYLINE, {
+			x: -5,
+			y: 0,
+			w: DEVICE_WIDTH,
+			h: px(150),
+			line_color: colorMin,
+			line_width: 3
+		});
+		polyline_min.addEventListener(event.CLICK_DOWN, function (info) {
+			//Registering event listeners.
+			logger.log(`polyline CLICK_DOWN event`);
+			logger.log(`polyline info = ${JSON.stringify(info)}`);
+
+			smooth_graph = !smooth_graph;
+			storage.setKey('smooth_graph', smooth_graph);
+			if (smooth_graph) weather_few_days_smooth(forecastData);
+			else weather_few_days(forecastData);
+		});
+
+		if (smooth_graph) weather_few_days_smooth(forecastData);
+		else weather_few_days(forecastData);
 
 		// update time
 		let timeStr = "";

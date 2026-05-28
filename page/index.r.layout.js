@@ -44,7 +44,7 @@ let btn_width = 350;
 let btn_hight = 50;
 let btn_radius = 15;
 let btn_border = 3;
-let group_width = 340;
+export let group_width = 340;
 // let group_width = btn_width;
 
 //#region BTN style

@@ -5,8 +5,8 @@
     "appName": "Weather service",
     "appType": "app",
     "version": {
-      "code": 3,
-      "name": "1.2.0"
+      "code": 4,
+      "name": "2.0.0"
     },
     "icon": "icon.png",
     "vender": "SashaCX75",
@@ -32,9 +32,9 @@
         "page": {
           "pages": [
             "page/index",
-            "page/info",
+            "page/settings",
             "page/graf",
-            "page/settings"
+            "page/info"
           ]
         },
         "app-service": {
