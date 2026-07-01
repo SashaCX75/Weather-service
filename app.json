@@ -2,11 +2,12 @@
   "configVersion": "v3",
   "app": {
     "appId": 1065824,
+    "_pikeCompatibled": 1,
     "appName": "Weather service",
     "appType": "app",
     "version": {
-      "code": 4,
-      "name": "2.0.0"
+      "code": 5,
+      "name": "2.0.1"
     },
     "icon": "icon.png",
     "vender": "SashaCX75",
